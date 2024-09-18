@@ -1,0 +1,112 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+@keyframes caerDelCielo {
+    0% {
+        top: -100px;
+        opacity: 0;
+    }
+    50% {
+        top: -100px;
+        opacity: 0;
+    }
+    100% {
+        top: 0;
+        opacity: 1;
+    }
+}
+
+@keyframes rebote {
+    0% {
+        transform: translateY(0);
+    }
+    30% {
+        transform: translateY(-15px);
+    }
+    60% {
+        transform: translateY(5px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.slide1,
+.slide2,
+.slide3 {
+    position: absolute;
+    top: 0;
+    transform: translateX(100%);
+    transition: transform 0.5s ease;
+}
+
+#lottie1 {
+    position: relative;
+    animation: none;
+    opacity: 1;
+}
+
+.service1:hover + .slide1,
+.service2:hover + .slide2,
+.service3:hover + .slide3 {
+    transform: translateX(0);
+}
+
+.service1:hover #lottie1 {
+    animation: caerDelCielo 1s ease-out, rebote 0.5s ease-out forwards;
+}
+
+.service {
+    background-color: #f9f9f9;
+    text-align: center;
+    padding: 20px;
+}
+
+
+
+.circle {
+    transform: scale(0);
+    transition: transform 0.5s ease;
+}
+
+
+h1, h3 {
+    font-weight: bold;
+}
+
+
+
+
+
+
+#idlocker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#idlockerValue {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 300px;
+}
+
+.service:hover {
+            background-color: #000057;
+            color: white;
+        }
+
+.service:hover .circle {
+    transform: scale(4);
+}
+
+.service:hover img {
+    transform: scale(1.2);
+}

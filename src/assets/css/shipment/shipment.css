@@ -1,0 +1,45 @@
+* {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+@keyframes openLocker {
+    0% {
+        background-color: #CCC;
+    }
+
+    100% {
+        background-color: rgb(251 146 60);
+    }
+}
+
+.open {
+    animation: openLocker 2s infinite alternate;
+}
+
+.active {
+    background-color: rgb(249 115 22) !important;
+    color: white;
+}
+
+.lockers-container {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: 4fr 2fr 2fr 1fr 1fr 1fr 1fr 5fr;
+}
+
+.screen-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 5fr 5fr 2fr 5fr;
+}
+
+body {
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* Internet Explorer/Edge */
+    user-select: none;
+    /* Estándar */
+}
