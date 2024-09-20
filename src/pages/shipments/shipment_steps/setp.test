@@ -6,7 +6,6 @@ import PaqueteExLogo from "../../../assets/images/logos/Paquetexpress Logo Vecto
 import axios from "axios";
 import ShipmentServices from "../../../components/ShipmentServices";
 import ShipmentInfo from "../../../components/ShipmentInfo";
-
 const logoMap = {
   Fedex: FedexLogo,
   Superenvios: "",
@@ -30,39 +29,26 @@ const packageFields = [
   { label: "Alto", key: "height", type: "number" },
   { label: "Ancho", key: "width", type: "number" },
   { label: "Largo", key: "length", type: "number" },
+  { label: "Peso", key: "weight", type: "number" },
+  { label: "Seguro", key: "insurance", type: "checkbox" },
   { label: "Valor", key: "value", type: "number" },
   { label: "Descripción", key: "description", type: "text" },
   { label: "Codigo Postal", key: "zipCode", type: "number" },
-  { label: "Seguro", key: "insurance", type: "checkbox" },
 ];
 
 const PackageFormSection = ({ title, data, onChange, disabled }) => (
   <div className="w-full bg-white p-6 rounded-lg shadow-md">
     <h3 className="text-2xl font-semibold mb-4">{title}</h3>
-    <div className="grid grid-cols-3 gap-5 items-center justify-center">
+    <div className="grid grid-cols-1 gap-4">
       {packageFields.map(({ label, key }) => (
-        <div className="gap-5">
-          {key === "insurance" ? (
-            
-            <InputField
-              key={key}
-              label={label}
-              value={data[key]}
-              type={key === "insurance" ? "checkbox" : "number"}
-              onChange={(e) => onChange({ ...data, [key]: e.target.value })}
-              disabled={disabled}
-            />
-          ) : (
-            <InputField
-              key={key}
-              label={label}
-              value={data[key]}
-              type={key === "description" ? "text" : "number"}
-              onChange={(e) => onChange({ ...data, [key]: e.target.value })}
-              disabled={disabled}
-            />
-          )}
-        </div>
+        <InputField
+          key={key}
+          label={label}
+          value={data[key]}
+          type={key === "insurance" ? "checkbox" : "number"}
+          onChange={(e) => onChange({ ...data, [key]: e.target.value })}
+          disabled={disabled}
+        />
       ))}
     </div>
   </div>
@@ -108,19 +94,17 @@ export default function Step3({
   handlePackageDataChange,
 }) {
   //Nuevos estados para el flujo de la cotización
-  const [step1, setStep1] = useState(true);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [step3, setStep3] = useState(false);
-  const [step4, setStep4] = useState(false);
-  const [step5, setStep5] = useState(false);
-  //
 
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [isConfirmedPackage, setIsConfirmedPackage] = useState(false);
+  const [goToUserDetails, setGoToUserDetails] = useState(false);
   const [goToDetails, setGoToDetails] = useState(false);
   const [isConfirmedQuote, setIsConfirmedQuote] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [quote, setQuote] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [packageData, setPackageData] = useState(null);
   const [data, setData] = useState({
     pais_origen: "MX",
     pais_destino: "MX",
@@ -144,12 +128,13 @@ export default function Step3({
   }, [destinationCP]);
 
   // Para mostrar los datos del paquete en el formulario de confirmación
-
   const handleContinue = () => {
     setShowConfirmation(true);
-    setStep1(false);
   };
 
+  const handleDetails = () => {
+    setGoToDetails(true);
+  };
   // Para mostrar los datos del paquete en el formulario de confirmación
   const handleConfirm = async () => {
     const updatedData = {
@@ -165,7 +150,6 @@ export default function Step3({
       valor_declarado: shippingData.package.value,
     };
 
-    setStep3(true);
     setData(updatedData);
     setShowConfirmation(false);
     setIsConfirmed(false);
@@ -175,24 +159,10 @@ export default function Step3({
   };
 
   // Para obtener la cotización de envío
-  // const fetchQuote = async (dataToSend) => {
-  //   try {
-  //     const response = await axios.post(
-  //       "http://localhost:3000/api/v1/shipping/quote",
-  //       dataToSend
-  //     );
-  //     console.log("Datos enviados:", dataToSend);
-  //     console.log("Quote:", response.data);
-  //     setQuote(response.data);
-  //   } catch (error) {
-  //     console.log("Error fetching quote:", error);
-  //   }
-  // };
-
   const fetchQuote = async (dataToSend) => {
     try {
       const response = await axios.post(
-        "https://dagpacket-backend.onrender.com/api/v1/shipping/quote",
+        "http://localhost:3000/api/v1/shipping/quote",
         dataToSend
       );
       console.log("Datos enviados:", dataToSend);
@@ -203,13 +173,18 @@ export default function Step3({
     }
   };
 
+  //
   const handleConfirmQuote = () => {
     setIsConfirmedQuote(true);
   };
 
   const handleEdit = () => {
     setShowConfirmation(false);
-    setStep1(true);
+    setIsConfirmedPackage(false);
+  };
+
+  const handleConfirmPackage = () => {
+    setIsConfirmedPackage(true);
   };
 
   const handleContinueStep = () => {
@@ -222,104 +197,119 @@ export default function Step3({
     handleCompanySelection(quote);
   };
 
-  const handleStep5 = () => {
-    setStep5(true);
-    setStep4(false);
+  const hideUserDetails = () => {
+    setUserData(false);
+    setPackageData(true);
   };
 
-  const handleStep4 = () => {
-    setStep4(true);
-    setStep3(false);
+  const handleUserData = () => {
+    setUserData(true);
+    setGoToUserDetails(true);
   };
 
   return (
-    <div className="p-6 overflow-hidden">
-      {step5 && (
+    <div className="p-6">
+      {!goToUserDetails && (
         <>
-          <ShipmentInfo data={shippingData} />
-          <button
-            onClick={handleContinueStep}
-            className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-            Continuar 4
-          </button>
+          {showConfirmation ? (
+            <div>
+              <h1 className="text-3xl font-semibold mb-6">Confirmar Datos</h1>
+              <div className="flex gap-8">
+                <PackageFormSection
+                  title="Datos del Paquete"
+                  data={shippingData.package}
+                  onChange={handlePackageDataChange}
+                  disabled={true} // Deshabilitar inputs
+                />
+              </div>
+              <div className="flex gap-4 mt-6">
+                {!isConfirmedPackage && (
+                  <button
+                    onClick={handleConfirm}
+                    className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-full">
+                    Confirmar 2
+                  </button>
+                )}
+              </div>
+              {isConfirmedPackage && (
+                <>
+                  <h2 className="text-2xl font-semibold mt-6">
+                    Compañias de Envíos
+                  </h2>
+                </>
+              )}
+            </div>
+          ) : (
+            <div>
+              <div className="flex gap-8">
+                <PackageFormSection
+                  title="Datos del Paquete"
+                  data={shippingData.package}
+                  onChange={handlePackageDataChange}
+                  disabled={false} // Habilitar inputs
+                />
+              </div>
+
+              <button
+                onClick={handleContinue}
+                className="bg-orange-500 text-white text-xl font-semibold px-6 py-3  mt-6 rounded-full">
+                Continuar 1
+              </button>
+            </div>
+          )}
+          <>
+            {isConfirmedPackage && (
+              <>
+                <ShipmentServices
+                  handleClick={handleSelectQuote}
+                  quote={quote}
+                />
+                <button
+                  onClick={handleUserData}
+                  className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
+                  Continuar 3
+                </button>
+              </>
+            )}
+          </>
         </>
       )}
-      {step4 && (
-        <>
-          <div className="grid grid-cols-2 gap-10">
-            <FormSection
-              title="Datos del Remitente"
-              data={shippingData.sender}
-              onChange={handleSenderDataChange}
-              disabled={false} // Habilitar inputs
-            />
-            <FormSection
-              title="Datos del Destinatario"
-              data={shippingData.recipient}
-              onChange={handleRecipientDataChange}
-              disabled={false} // Habilitar inputs
-            />
+      ¨{" "}
+      <>
+        {userData && (
+          <>
+            <div className="grid grid-cols-2 gap-10">
+              <FormSection
+                title="Datos del Remitente"
+                data={shippingData.sender}
+                onChange={handleSenderDataChange}
+                disabled={false} // Habilitar inputs
+              />
+              <FormSection
+                title="Datos del Destinatario"
+                data={shippingData.recipient}
+                onChange={handleRecipientDataChange}
+                disabled={false} // Habilitar inputs
+              />
+              <button
+                onClick={hideUserDetails}
+                className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
+                Continuar 4
+              </button>
+            </div>
+          </>
+        )}
+        {packageData && (
+          <>
+            <ShipmentInfo data={shippingData} />
             <button
-              onClick={handleStep5}
+              onClick={handleContinueStep}
               className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
               Continuar 4
             </button>
-          </div>
-        </>
-      )}
-      {step3 && (
-        <>
-          <ShipmentServices
-            handleClick={handleSelectQuote}
-            quote={quote}
-            handleStep4={handleStep4}
-            logoMap={logoMap}
-          />
-        </>
-      )}
-      {showConfirmation && (
-        <div>
-          <h1 className="text-3xl font-semibold mb-6">Confirmar Datos</h1>
-          <div className="flex gap-8">
-            <PackageFormSection
-              title="Datos del Paquete"
-              data={shippingData.package}
-              onChange={handlePackageDataChange}
-              disabled={true} // Deshabilitar inputs
-            />
-          </div>
-          <div className="flex gap-4 mt-6">
-            <button
-              onClick={handleConfirm}
-              className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-full">
-              Confirmar 2
-            </button>
-            <button
-              onClick={handleEdit}
-              className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-full">
-              Editar
-            </button>
-          </div>
-        </div>
-      )}
-      {step1 && (
-        <div>
-          <div className="flex gap-8">
-            <PackageFormSection
-              title="Datos del Paquete"
-              data={shippingData.package}
-              onChange={handlePackageDataChange}
-              disabled={false} // Habilitar inputs
-            />
-          </div>
-
-          <button
-            onClick={handleContinue}
-            className="bg-orange-500 text-white text-xl font-semibold px-6 py-3  mt-6 rounded-full">
-            Continuar 1
-          </button>
-        </div>
-      )}
+          </>
+        )}
+      </>
     </div>
   );
 }

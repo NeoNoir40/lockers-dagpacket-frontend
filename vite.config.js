@@ -3,5 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  assetsInclude: ['**/*.lottie'] // Add this line to handle .lottie files
+  server: {
+    host: true,  // Permite conexiones desde cualquier dispositivo en la red local
+    port: 5173,  // Puedes cambiar el puerto si es necesario
+  },
+  assetsInclude: ['**/*.lottie'], // Maneja archivos .lottie
 });

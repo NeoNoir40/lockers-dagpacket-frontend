@@ -1,14 +1,90 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 import "../../../assets/css/shipment/shipment.css";
 
 const Step2 = ({ handleClick, onWeightChange }) => {
   const [detectedWeight, setDetectedWeight] = useState("");
+  const [openDoor, setOpenDoor] = useState(false);
+  const [weight, setWeight] = useState("");
 
   const handleContinue = () => {
-    // Cambiar al paso 3 al hacer clic en Continuar
     handleClick(3);
+  };
+
+  const TOKEN =
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjY2YzI4YjdlZTNmMTExMzRmNzRmODI5NiIsIm5hbWUiOiJIdWdvIiwic3VybmFtZSI6IlJ1aXoiLCJlbWFpbCI6ImRlc2Fycm9sbG93ZWJAZGFncGFja2V0LmNvbS5teCIsInJvbGUiOiJBRE1JTiJ9LCJpYXQiOjE3MjY3ODQyOTYsImV4cCI6MTcyNjgxMzA5Nn0.tM7mrxgxMzc2OsYcKxNnbcYEUnrPUk9ofzwMCdFQuds";
+
+  const handleOpenDoor = async () => {
+    try {
+      const openDoorResponse = await axios.post(
+        "http://192.168.1.95:3000/api/v1/mqtt/",
+        {
+          locker_id: "2",
+          action: "sendLocker",
+          gabeta: "100",
+        },{
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      );
+
+      if (!openDoorResponse.data.error) {
+        setOpenDoor(true);
+
+        Swal.fire({
+          title: "Locker Abierto",
+          text: `El locker se ha abierto correctamente.`,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+
+        const weightResponse = await axios.post(
+          "http://192.168.1.95:3000/api/v1/mqtt/",
+          {
+            locker_id: "2",
+            action: "getWeight",
+            gabeta: "100",
+          },{
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+            },
+          }
+        );
+
+        if (!weightResponse.data.error) {
+          const message = weightResponse.data.message;
+          const weight = message.split(':')[1].trim();  // Obtener la parte después de ':'
+          setWeight(weight);
+          onWeightChange(weight);
+          handleClick(3);
+          console.log(weight);
+          
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: `No se pudo obtener el peso del paquete.`,
+            icon: "error",
+            confirmButtonText: "OK",
+          });
+        }
+      }
+
+      if(weight && openDoor){
+        handleClick(3);
+      }
+
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error",
+        text: `No se pudo abrir el locker.`,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
   };
 
   const handleStartWeighing = () => {
@@ -31,9 +107,8 @@ const Step2 = ({ handleClick, onWeightChange }) => {
 
   return (
     <div className="step2 flex flex-col justify-center items-center gap-8 bg-white p-10 rounded-md shadow-md">
-   
       <h1 className="text-3xl font-semibold mx-8 text-center">
-        Espera a que el locker indicado se abra e{" "}
+        Espera a que el locker indicado se abra e
         <span className="text-orange-500">introduce tu paquete</span> para
         pesarlo
       </h1>
@@ -76,6 +151,11 @@ const Step2 = ({ handleClick, onWeightChange }) => {
           display: showContinueButton ? "block" : "none",
         }}>
         Continuar
+      </button>
+      <button
+        onClick={handleOpenDoor}
+        className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-4">
+        PRUEBA DE BOTON CON MQTT
       </button>
       <h3 id="weight" className="text-xl">
         {detectedWeight && `Peso: ${detectedWeight} kg`}

@@ -1,4 +1,4 @@
-export default function ShipmentInfo({ data, handleClick }) {
+export default function ShipmentInfo({ data, }) {
   console.log(data);
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg mt-2">
@@ -83,31 +83,55 @@ export default function ShipmentInfo({ data, handleClick }) {
           <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
             <h2 className="text-xl font-medium mb-2">Paquete</h2>
             <p className="mb-1">
-              <strong className="font-semibold">Alto:</strong> {data.package.height}
+              <strong className="font-semibold">Alto:</strong>{" "}
+              {data.package.height}
             </p>
             <p className="mb-1">
-              <strong className="font-semibold">Ancho:</strong> {data.package.width}
+              <strong className="font-semibold">Ancho:</strong>{" "}
+              {data.package.width}
             </p>
             <p className="mb-1">
-              <strong className="font-semibold">Largo:</strong> {data.package.length}
+              <strong className="font-semibold">Largo:</strong>{" "}
+              {data.package.length}
             </p>
             <p className="mb-1">
-              <strong className="font-semibold">Peso:</strong> {data.package.weight}
+              <strong className="font-semibold">Peso:</strong>{" "}
+              {data.package.weight}
             </p>
             <p className="mb-1">
-              <strong className="font-semibold">Seguro:</strong> {data.package.insurance ? "Sí" : "No"}
+              <strong className="font-semibold">Seguro:</strong>{" "}
+              {data.package.insurance ? "Sí" : "No"}
             </p>
             <p className="mb-1">
-              <strong className="font-semibold">Valor:</strong> {data.package.value}
+              <strong className="font-semibold">Valor:</strong>{" "}
+              {data.package.value}
             </p>
           </div>
         </div>
+        <div>
+          <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
+            <h2 className="text-xl font-medium mb-2">Paqueteria</h2>
+            <p className="mb-1">
+              <strong className="font-semibold">Nombre:</strong>{" "}
+              {data.company.proveedor}
+            </p>
+            <p className="mb-1">
+              <strong className="font-semibold">Servicio:</strong>{" "}
+              {data.company.nombre_servicio}
+            </p>
+            <p className="mb-1">
+              <strong className="font-semibold">Precio:</strong>{" "}
+              {data.company.precio}
+            </p>
+            <p className="mb-1">
+              <strong className="font-semibold">Kilos a cobrar:</strong>{" "}
+              {data.company.kilos_a_cobrar}
+            </p>
+           
+          </div>
+        </div>
       </div>
-      <button
-      onClick={handleClick}
-        className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-        Cotizar
-      </button>
+  
     </div>
   );
 }

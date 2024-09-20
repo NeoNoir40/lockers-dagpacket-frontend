@@ -11,12 +11,8 @@ import Box from "../assets/images/package.png";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
-  const [lockerId, setLockerId] = useState(null);
 
-  useEffect(() => {
-    const storedLockerId = localStorage.getItem("lockerId");
-    setLockerId(storedLockerId);
-  }, []);
+ 
 
   const handleClick = (path) => {
     window.location.href = path;
