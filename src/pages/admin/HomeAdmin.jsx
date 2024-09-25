@@ -79,57 +79,43 @@ export default function HomePageAdmin() {
                 Cantidad de gabetas: {user.locker_info.quant_gabetas}
               </p>
             </div>
-            <div className="bg-[#2C2C2C]">
-              <h1 className=" text-2xl text-center pt-2 text-white font-semibold">
-                Gabetas del locker {user.locker_info.ubication} -{" "}
-                {user.locker_info.city}
-              </h1>
-              <div className=" h-fit grid p-10 rounded-lg grid-cols-4 gap-5 ">
-                {currentGabetas.map((gabeta) => (
-                  <div className="bg-[#383838] h-fit rounded-md p-5 text-white">
-                    <p className="p-2">
-                      <span className="">Tipo:</span> {gabeta.type}
-                    </p>
-                    <p className="p-2">Ubicación: {gabeta.ubication}</p>
-                    <p className="p-2">
-                      <span className="">Dimensiones:</span>{" "}
-                      {gabeta.gabeta_dimension}
-                    </p>
-                    <p className="p-2">
-                      <span className="">Tamaño:</span> {gabeta.size}
-                    </p>
-                    <p className="p-2">
-                      <span>
-                        <span className="">Disponibilidad:</span>{" "}
-                        <span
-                          className={
-                            gabeta.staturation == true
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }>
-                          {gabeta.staturation == true
-                            ? "Disponible"
-                            : "Ocupada"}
-                        </span>
+            <div className="bg-[#2C2C2C] text-white p-10 rounded-lg shadow-lg">
+            <h1 className="text-2xl text-center mb-5">Gabetas del locker</h1>
+            <table className="table-auto w-full text-left">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2">Tipo</th>
+                  <th className="px-4 py-2">Ubicación</th>
+                  <th className="px-4 py-2">Disponibilidad</th>
+                  <th className="px-4 py-2">Estatus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentGabetas.map((gabeta, index) => (
+                  <tr key={index} className="bg-[#383838]">
+                    <td className="border px-4 py-2">{gabeta.type}</td>
+                    <td className="border px-4 py-2">{gabeta.ubication}</td>
+                    <td className="border px-4 py-2">
+                      <span
+                        className={
+                          gabeta.saturation ? "text-red-500" : "text-green-500"
+                        }>
+                        {gabeta.saturation ? "Ocupada" : "Disponible"}
                       </span>
-                    </p>
-                    <p className="p-2">
-                      <span>
-                        <span className="">Estatus:</span>{" "}
-                        <span
-                          className={
-                            gabeta.status == true
-                              ? "text-green-500"
-                              : "text-red-500"
-                          }>
-                          {gabeta.status == true ? "Disponible" : "Ocupada"}
-                        </span>
+                    </td>
+                    <td className="border px-4 py-2">
+                      <span
+                        className={
+                          gabeta.status ? "text-green-500" : "text-red-500"
+                        }>
+                        {gabeta.status ? "Disponible" : "Ocupada"}
                       </span>
-                    </p>
-                  </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-            </div>
+              </tbody>
+            </table>
+          </div>
           </div>
 
           {/* Paginación */}

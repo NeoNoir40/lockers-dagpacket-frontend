@@ -8,18 +8,91 @@ import animationShipping from "../assets/lotties/js/shipping.json";
 import animationBills from "../assets/lotties/js/bills.json";
 import animationPackage from "../assets/lotties/js/packagelottie.json";
 import Box from "../assets/images/package.png";
+import { useNavigate } from "react-router-dom";
+import { getCode } from "country-list";
 import { Link } from "react-router-dom";
 
 const HomePage = () => {
-
- 
+  const navigate = useNavigate();
 
   const handleClick = (path) => {
     window.location.href = path;
   };
 
+  const [useLockerId, setLockerId] = useState("");
+  const [idGabeta, setIdGabeta] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [scale, setScale] = useState("");
+  const [hide, setHiden] = useState(false);
+  console.log(hide)
+  const handleLocker = (data) => {
+    try {
+      localStorage.setItem("locker_id", data);
+
+      const lockerid = localStorage.getItem("locker_id");
+
+      if (!lockerid) {
+        return console.error("No se pudo obtener el id del locker");
+      }
+
+      console.log("se seteo el locker correctamente");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleZipCode = (data) => {
+    try {
+      localStorage.setItem("zipCode", data);
+
+      const scaleid = localStorage.getItem("zipCode");
+
+      if (!scaleid) {
+        return console.error("No se pudo obtener el codigo postal del lcoker");
+      }
+    } catch (error) {
+      console.log("Ocurrio un error" + error);
+    }
+  };
+
+  useEffect(() => {
+    localStorage.setItem("scale", 100);
+
+    if (zipCode && useLockerId === null) {
+      setHiden(true);
+      console.log("No se han definido las variables de las pesas y de locker");
+    }else{
+
+    }
+  }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleLocker(useLockerId);
+    handleZipCode(zipCode);
+  };
+
   return (
-    <main className="flex flex-col w-full min-h-[100vh] bg-white">
+    <main className="flex flex-col w-full min-h-[100vh] bg-white overflow-hidden">
+      {!hide && (
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            className="w-1/4"
+            placeholder="lockerid"
+            value={useLockerId}
+            onChange={(e) => setLockerId(e.target.value)}
+          />
+          <input
+            type="text"
+            className=" w-1/4"
+            placeholder="zipCode"
+            value={zipCode}
+            onChange={(e) => setZipCode(e.target.value)}
+          />
+          <button type="submit">Submit</button>
+        </form>
+      )}
       <div id="topSection" className="grid grid-cols-2 w-full h-[55vh]">
         <div className="flex flex-col gap-4 justify-center items-center">
           <img src={Logo} alt="Logo" className="mb-12 w-1/2" />
@@ -87,7 +160,7 @@ const HomePage = () => {
         </div>
         <div
           className="service2 service flex flex-col justify-around items-center bg-gray-100 w-full h-full relative overflow-hidden"
-          onClick={() => handleClick("./recibir.php")}>
+          onClick={() => navigate("/recolectar")}>
           <div className="circle absolute w-52 h-52 bg-[#FFFFFF35] rounded-full"></div>
           <div className="flex flex-col justify-center items-center px-12 gap-1">
             <h3 className="text-3xl font-medium text-center z-10">
@@ -125,8 +198,9 @@ const HomePage = () => {
             />
           </div>
         </div>
-        <Link to={"/servicios"}
-         className="service3 service flex flex-col justify-around items-center bg-gray-100 w-full h-full relative overflow-hidden">
+        <Link
+          to={"/servicios"}
+          className="service3 service flex flex-col justify-around items-center bg-gray-100 w-full h-full relative overflow-hidden">
           <div className="circle absolute w-52 h-52 bg-[#FFFFFF35] rounded-full"></div>
           <div className="flex flex-col justify-center items-center px-12 gap-1 hover:text-white ">
             <h3 className="text-3xl font-medium text-center z-10 ">

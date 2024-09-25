@@ -8,6 +8,8 @@ import { AuthProvider } from "../context/AuthContext";
 import Login from "./pages/login/Login";
 import ProtectedRoute from "../ProtectedRoutes/ProtectedRoute";
 import HomePageAdmin from "./pages/admin/HomeAdmin";
+import Recolect from "./pages/collect/Recolect";
+
 function App() {
   return (
     <AuthProvider>
@@ -17,6 +19,8 @@ function App() {
           <Route path="/envios" element={<Shipment />} />
           <Route path="/servicios" element={<RechargeServices />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/recolectar" element={<Recolect/>}/>
+
           {/* <Route element={<ProtectedRoute />}> */}
           <Route path="/home" element={<HomePageAdmin />} />
           {/* </Route> */}

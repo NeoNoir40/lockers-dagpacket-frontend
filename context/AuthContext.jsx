@@ -1,14 +1,20 @@
 import { createContext, useState, useContext, useEffect } from "react";
-import { loginLocker, verifyToken, fetchGabetasByLockerId } from "./auth";
+
+import {
+  loginLocker,
+  verifyToken,
+  fetchGabetasByLockerId,
+  fetchGabetasAviable,
+} from "./auth";
 import Swal from "sweetalert2";
-import { set } from "react-hook-form";
+
 export const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error("useAuth deberia estar trabajando con AuthProvider");
+    throw new Error("useAuth debería estar trabajando con AuthProvider");
   }
   return context;
 };
@@ -26,8 +32,10 @@ export const AuthProvider = ({ children }) => {
       console.log(response);
       if (!response.token) {
         console.log("No hay token");
+        return;
       }
-
+      localStorage.setItem("locker_id", response.user.locker_info.id_locker);
+      localStorage.setItem('user_id', response.user.user_id);
       localStorage.setItem("token", response.token);
       setUser(response.user);
       setLockerId(response.user.locker_info._id);
@@ -39,56 +47,94 @@ export const AuthProvider = ({ children }) => {
   };
 
   const handleLocker = (locker) => {
+    if (!locker) {
+      Swal.fire({
+        title: "Error",
+        text: "Por favor selecciona un locker",
+        icon: "error",
+        confirmButtonText: "Aceptar",
+        input: "text",
+        inputPlaceholder: "Ingresa el locker",
+        inputValue: locker,
+        preConfirm: (value) => {
+          setLocker(value);
+          localStorage.setItem("locker", value);
+        },
+      });
+      console.log(locker);
+      return;
+    }
+  };
+
+  useEffect(() => {
+    // Solo se ejecutará al recargar la página o montar el componente
+    const checkLogin = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setIsAuthenticated(false);
+        setUser(null);
+        console.log("No hay token en checklogin");
+        return;
+      }
+
+      setIsAuthenticated(true);
+    };
+
+    checkLogin();
+  }, []); // Se ejecuta solo una vez al montar el componente
+
+  const getGabetas = async () => {
     try {
-      if (!locker) {
+      const response = await fetchGabetasAviable();
+      console.log(response);
+
+      if (response.error) {
+        console.log("Error al obtener las gabetas");
+        return;
+      }
+
+      if (response.success && response.message.length > 0) {
+        const idGabeta = response.message[0].id_gabeta;
+        const _idgabeta = response.message[0]._id;
+
+        localStorage.setItem("_idgabeta", _idgabeta);
+        localStorage.setItem("idGabeta", idGabeta);
+
+        console.log(`_idgabeta almacenado: ${_idgabeta}`);
+        console.log(`idGabeta almacenado: ${idGabeta}`);
+        setGabetas(response);
+      } else {
         Swal.fire({
           title: "Error",
-          text: "Por favor selecciona un locker",
+          text: "No hay gabetas disponibles",
           icon: "error",
           confirmButtonText: "Aceptar",
-          input: "text",
-          inputPlaceholder: "Ingresa el locker",
-          inputValue: locker,
-          preConfirm: (value) => {
-            setLocker(value);
-            localStorage.setItem("locker", value);
-          },
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/";
+          }
         });
-        console.log(locker);
-        return;
+        console.log("No hay gabetas disponibles");
       }
     } catch (e) {
       console.log(e);
     }
   };
 
-  useEffect(() => {
-    async function checkLogin() {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        setIsAuthenticated(false);
-        setUser(null);
-        console.log("No hay token en checklogin ");
-        return;
-      }
-
-      setIsAuthenticated(true);
-    }
-
-    checkLogin();
-  }, []);
 
   useEffect(() => {
-    async function checkLocker() {
+    // Solo se ejecutará al recargar la página o montar el componente
+    const checkLocker = async () => {
       const token = localStorage.getItem("token");
+  
       if (!token) {
         setIsAuthenticated(false);
         setUser(null);
         console.log("No hay token en checkLocker");
         return;
       }
-
+  
       const response = await verifyToken(token);
       if (response.error) {
         setIsAuthenticated(false);
@@ -96,45 +142,54 @@ export const AuthProvider = ({ children }) => {
         console.log("Error en checkLocker");
         return;
       }
-
+  
       setUser(response);
-      // console.log(response);
       const locker_id = response.locker_info._id;
       setIsAuthenticated(true);
-
-      if(!locker_id) {
+  
+      if (!locker_id) {
         console.log("Locker id no encontrado");
         return;
       }
-
+  
       const gabetas = await fetchGabetasByLockerId(locker_id);
-
-
+  
       if (gabetas.error) {
         console.log("Error al obtener las gabetas");
         return;
       }
-      console.log(gabetas);
+  
+      console.log("Gabetas obtenidas", gabetas);
+  
+      // Buscar la gaveta que tenga el atributo type: "weighing scale"
+      const weighingScaleGabeta = gabetas.find((gabeta) => gabeta.type === "weighing scale");
+  
+      if (weighingScaleGabeta) {
+        // Almacenar su id en el localStorage
+        localStorage.setItem("weighing_scale_gabeta_id", weighingScaleGabeta.id_gabeta);
+        // console.log("Gaveta con weighing scale encontrada, ID almacenado:", weighingScaleGabeta.id_gabeta);
+      } else {
+        console.log("No se encontró una gaveta con tipo 'weighing scale'");
+      }
+  
       setGabetas(gabetas);
-    }
-
-    // Ejecutar checkLocker inmediatamente y luego en intervalos
-    checkLocker();
-    const intervalId = setInterval(checkLocker, 5000); // Verificar cada 5 segundos
-
-    return () => clearInterval(intervalId); // Limpiar el intervalo al desmontar
-  }, []);
-
+    };
+  
+    checkLocker(); // Solo se ejecutará una vez al montar el componente
+  }, []); // Se ejecuta solo una vez al montar el componente
+  
   return (
     <AuthContext.Provider
       value={{
         handleLocker,
         loginRequest,
+        getGabetas,
         locker,
         isAuthenticated,
         user,
         gabetas,
-      }}>
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

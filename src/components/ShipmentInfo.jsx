@@ -1,4 +1,4 @@
-export default function ShipmentInfo({ data, }) {
+export default function ShipmentInfo({ data }) {
   console.log(data);
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg mt-2">
@@ -102,10 +102,6 @@ export default function ShipmentInfo({ data, }) {
               <strong className="font-semibold">Seguro:</strong>{" "}
               {data.package.insurance ? "Sí" : "No"}
             </p>
-            <p className="mb-1">
-              <strong className="font-semibold">Valor:</strong>{" "}
-              {data.package.value}
-            </p>
           </div>
         </div>
         <div>
@@ -124,14 +120,12 @@ export default function ShipmentInfo({ data, }) {
               {data.company.precio}
             </p>
             <p className="mb-1">
-              <strong className="font-semibold">Kilos a cobrar:</strong>{" "}
-              {data.company.kilos_a_cobrar}
+              <strong className="font-semibold">Tipo de paquete:</strong>{" "}
+              {data.package.type}
             </p>
-           
           </div>
         </div>
       </div>
-  
     </div>
   );
 }

@@ -6,6 +6,8 @@ import PaqueteExLogo from "../../../assets/images/logos/Paquetexpress Logo Vecto
 import axios from "axios";
 import ShipmentServices from "../../../components/ShipmentServices";
 import ShipmentInfo from "../../../components/ShipmentInfo";
+import { useAuth } from "../../../../context/AuthContext";
+const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 
 const logoMap = {
   Fedex: FedexLogo,
@@ -27,37 +29,36 @@ const inputFields = [
 ];
 
 const packageFields = [
-  { label: "Alto", key: "height", type: "number" },
-  { label: "Ancho", key: "width", type: "number" },
-  { label: "Largo", key: "length", type: "number" },
-  { label: "Valor", key: "value", type: "number" },
   { label: "Descripción", key: "description", type: "text" },
-  { label: "Codigo Postal", key: "zipCode", type: "number" },
   { label: "Seguro", key: "insurance", type: "checkbox" },
 ];
+
+
 
 const PackageFormSection = ({ title, data, onChange, disabled }) => (
   <div className="w-full bg-white p-6 rounded-lg shadow-md">
     <h3 className="text-2xl font-semibold mb-4">{title}</h3>
-    <div className="grid grid-cols-3 gap-5 items-center justify-center">
+    <div className="grid grid-cols-1 gap-5">
       {packageFields.map(({ label, key }) => (
-        <div className="gap-5">
+        <div key={key} className="flex items-center">
           {key === "insurance" ? (
-            
-            <InputField
-              key={key}
-              label={label}
-              value={data[key]}
-              type={key === "insurance" ? "checkbox" : "number"}
-              onChange={(e) => onChange({ ...data, [key]: e.target.value })}
-              disabled={disabled}
-            />
+            <>
+              <label htmlFor="insurance-checkbox" className="mr-2 text-orange-500 font-normal">
+                {label}
+              </label>
+              <input
+                type="checkbox"
+                id="insurance-checkbox"
+                checked={data[key] || false}
+                onChange={(e) => onChange({ ...data, [key]: e.target.checked })}
+                disabled={disabled}
+              />
+            </>
           ) : (
             <InputField
-              key={key}
               label={label}
               value={data[key]}
-              type={key === "description" ? "text" : "number"}
+              type="text"
               onChange={(e) => onChange({ ...data, [key]: e.target.value })}
               disabled={disabled}
             />
@@ -67,6 +68,7 @@ const PackageFormSection = ({ title, data, onChange, disabled }) => (
     </div>
   </div>
 );
+
 
 const InputField = ({ label, value, onChange, disabled, type }) => (
   <input
@@ -78,7 +80,9 @@ const InputField = ({ label, value, onChange, disabled, type }) => (
     className={`border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 ${
       disabled ? "bg-gray-200 cursor-not-allowed" : ""
     }`}
+    
   />
+  
 );
 
 const FormSection = ({ title, data, onChange, disabled }) => (
@@ -108,18 +112,33 @@ export default function Step3({
   handlePackageDataChange,
 }) {
   //Nuevos estados para el flujo de la cotización
+  const {getGabetas} = useAuth();
+
   const [step1, setStep1] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [step3, setStep3] = useState(false);
   const [step4, setStep4] = useState(false);
   const [step5, setStep5] = useState(false);
   //
-
+  const cp = localStorage.getItem('zipCode')
   const [isConfirmedPackage, setIsConfirmedPackage] = useState(false);
   const [goToDetails, setGoToDetails] = useState(false);
   const [isConfirmedQuote, setIsConfirmedQuote] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
+  const [inputValue, setInputValue] = useState("");
+
+  const handleKeyPress = (key) => {
+    if (key === 'C') {
+      setInputValue(""); // Limpiar el input
+    } else if (key === 'OK') {
+      // Aquí puedes manejar el valor ingresado
+      console.log("Valor ingresado:", inputValue);
+    } else {
+      setInputValue((prev) => prev + key); // Agregar el número al input
+    }
+  };
+  
   const [quote, setQuote] = useState(null);
   const [data, setData] = useState({
     pais_origen: "MX",
@@ -146,6 +165,7 @@ export default function Step3({
   // Para mostrar los datos del paquete en el formulario de confirmación
 
   const handleContinue = () => {
+    getGabetas();
     setShowConfirmation(true);
     setStep1(false);
   };
@@ -155,13 +175,13 @@ export default function Step3({
     const updatedData = {
       pais_origen: "MX",
       pais_destino: "MX",
-      cp_origen: shippingData.package.zipCode,
+      cp_origen: cp,
       cp_destino: shippingData.recipient.zipCode,
       alto: shippingData.package.height,
       ancho: shippingData.package.width,
       largo: shippingData.package.length,
       peso: shippingData.package.weight,
-      seguro: shippingData.package.insurance,
+      seguro: shippingData.package.insurance || false,
       valor_declarado: shippingData.package.value,
     };
 
@@ -174,26 +194,18 @@ export default function Step3({
     console.log("Click en confirmar");
   };
 
-  // Para obtener la cotización de envío
-  // const fetchQuote = async (dataToSend) => {
-  //   try {
-  //     const response = await axios.post(
-  //       "http://localhost:3000/api/v1/shipping/quote",
-  //       dataToSend
-  //     );
-  //     console.log("Datos enviados:", dataToSend);
-  //     console.log("Quote:", response.data);
-  //     setQuote(response.data);
-  //   } catch (error) {
-  //     console.log("Error fetching quote:", error);
-  //   }
-  // };
+
 
   const fetchQuote = async (dataToSend) => {
     try {
+      const TOKEN = localStorage.getItem("token");
       const response = await axios.post(
-        "https://dagpacket-backend.onrender.com/api/v1/shipping/quote",
-        dataToSend
+        `${api}/shipping/quote`,
+        dataToSend,{
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
       );
       console.log("Datos enviados:", dataToSend);
       console.log("Quote:", response.data);
@@ -202,6 +214,8 @@ export default function Step3({
       console.log("Error fetching quote:", error);
     }
   };
+
+  const handleSubmit = () => {};
 
   const handleConfirmQuote = () => {
     setIsConfirmedQuote(true);
@@ -311,6 +325,7 @@ export default function Step3({
               onChange={handlePackageDataChange}
               disabled={false} // Habilitar inputs
             />
+          
           </div>
 
           <button

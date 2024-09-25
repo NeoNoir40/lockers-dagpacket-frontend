@@ -1,32 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Step1 from "./shipment_steps/Step1";
 import Step2 from "./shipment_steps/Step2";
 import Step3 from "./shipment_steps/Step3";
 import Step4 from "./shipment_steps/Step4";
 import Step5 from "./shipment_steps/Step5";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import { get } from "react-hook-form";
 
 export default function Shipment() {
-  // Estado para el paso actual
-  const [currentStep, setCurrentStep] = useState(1);
 
-  // Estados para almacenar la información del usuario
+  const { getGabetas } = useAuth();
+
+  const [currentStep, setCurrentStep] = useState(1);
   const [destinationCP, setDestinationCP] = useState("");
+  const [senderCP, setSenderCP] = useState("");
   const [weight, setWeight] = useState("");
   const [packageType, setPackageType] = useState("sobre");
   const [shippingData, setShippingData] = useState({
-    sender: {},
+    sender: { zipCode: "" },
     recipient: {},
-    package: { weight: "", type: "" },
+    package: { weight: "", type: "", insured: false }, // Agrega un campo para seguro
     company: null,
   });
 
-  // Manejar el cambio de paso
+ 
+
+  const { user } = useAuth();
+  console.log(shippingData);
+
   const handleStepChange = (step) => {
     setCurrentStep(step);
   };
 
-  // Manejar el cambio del código postal
   const handleCPChange = (value) => {
     setDestinationCP(value);
     if (value === "00000") {
@@ -34,12 +40,18 @@ export default function Shipment() {
     }
   };
 
-  // Manejar el cambio del peso
+  const handleSenderCPChange = (value) => {
+    setSenderCP(value);
+    if (value === "00000") {
+      window.location.href = "/login";
+    }
+  };
+
   const handleWeightChange = (value) => {
     setWeight(value);
     setShippingData((prev) => ({
       ...prev,
-      package: { ...prev.package, weight: value }, // Actualizar el peso en package
+      package: { ...prev.package, weight: value },
     }));
   };
 
@@ -47,11 +59,18 @@ export default function Shipment() {
     setPackageType(value);
     setShippingData((prev) => ({
       ...prev,
-      package: { ...prev.package, type: value }, // Actualizar el tipo de paquete en package
+      package: {
+        ...prev.package,
+        type: value,
+        height: value === "Sobre" ? 10 : prev.package.height, // Asignar 10 si es "sobre"
+        width: value === "Sobre" ? 10 : prev.package.width, // Asignar 10 si es "sobre"
+        length: value === "Sobre" ? 10 : prev.package.length, // Asignar 10 si es "sobre"
+        weight: value === "Sobre" ? 1 : prev.package.weight, // Asignar 10 si es "sobre"
+        value: value === "Sobre" ? 100 : prev.package.value, // Asignar 0 si es "sobre"
+      },
     }));
   };
 
-  // Manejar los datos del remitente
   const handleSenderDataChange = (data) => {
     setShippingData((prev) => ({
       ...prev,
@@ -59,7 +78,6 @@ export default function Shipment() {
     }));
   };
 
-  // Manejar los datos del destinatario
   const handleRecipientDataChange = (data) => {
     setShippingData((prev) => ({
       ...prev,
@@ -73,14 +91,28 @@ export default function Shipment() {
       package: data,
     }));
   };
+  
 
-  // Manejar la selección de la compañía de envío
   const handleCompanySelection = (company) => {
     setShippingData((prev) => ({
       ...prev,
       company,
     }));
   };
+
+  useEffect(() => {
+
+    // getGabetas();
+
+    if (user) {
+      setShippingData((prev) => ({
+        ...prev,
+        sender: {
+          zipCode: user.locker_info.cp,
+        },
+      }));
+    }
+  }, []);
 
   return (
     <body className="overflow-hidden">
@@ -107,7 +139,7 @@ export default function Shipment() {
           </div>
         ))}
       </header>
-      <main className="min-h-screen w-[100vw] flex justify-center items-center bg-gray-100 overflow-hidden">
+      <main className="h-[44vw] w-[100vw] flex justify-center items-center bg-gray-100 overflow-hidden">
         <Link
           to="/"
           className="fixed top-16 left-4 z-40 w-1/6 mt-4 bg-gray-300 w-auto px-6 py-2 rounded-full cursor-pointer hover:bg-gray-400"
@@ -118,9 +150,11 @@ export default function Shipment() {
           <Step1
             handleClick={handleStepChange}
             destinationCP={destinationCP}
+            senderCP={senderCP}
             onCPChange={handleCPChange}
             handleWeightChange={handleWeightChange}
             handlePackage={handlePackageTypeChange}
+            onSenderCPChange={handleSenderCPChange}
           />
         )}
         {currentStep === 2 && (
@@ -139,6 +173,7 @@ export default function Shipment() {
             handleCompanySelection={handleCompanySelection}
             handleStepChange={handleStepChange}
             destinationCP={destinationCP}
+            senderCP={senderCP}
             shippingData={shippingData}
           />
         )}
@@ -148,8 +183,12 @@ export default function Shipment() {
             handleStepChange={handleStepChange}
           />
         )}
-        {currentStep === 5 && <Step5 handleStepChange={handleStepChange} />}
-        {/* Añade más componentes para otros pasos aquí */}
+        {currentStep === 5 && (
+          <Step5
+            shippingData={shippingData}
+            handleStepChange={handleStepChange}
+          />
+        )}
       </main>
     </body>
   );

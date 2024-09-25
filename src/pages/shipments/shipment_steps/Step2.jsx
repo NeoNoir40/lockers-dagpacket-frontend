@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
+const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 
 import "../../../assets/css/shipment/shipment.css";
 
@@ -8,44 +9,65 @@ const Step2 = ({ handleClick, onWeightChange }) => {
   const [detectedWeight, setDetectedWeight] = useState("");
   const [openDoor, setOpenDoor] = useState(false);
   const [weight, setWeight] = useState("");
-
+const id_locker = localStorage.getItem("locker_id");
+const scale = localStorage.getItem("weighing_scale_gabeta_id");
   const handleContinue = () => {
     handleClick(3);
   };
 
-  const TOKEN =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Il9pZCI6IjY2YzI4YjdlZTNmMTExMzRmNzRmODI5NiIsIm5hbWUiOiJIdWdvIiwic3VybmFtZSI6IlJ1aXoiLCJlbWFpbCI6ImRlc2Fycm9sbG93ZWJAZGFncGFja2V0LmNvbS5teCIsInJvbGUiOiJBRE1JTiJ9LCJpYXQiOjE3MjY3ODQyOTYsImV4cCI6MTcyNjgxMzA5Nn0.tM7mrxgxMzc2OsYcKxNnbcYEUnrPUk9ofzwMCdFQuds";
-
-  const handleOpenDoor = async () => {
-    try {
-      const openDoorResponse = await axios.post(
-        "http://192.168.1.95:3000/api/v1/mqtt/",
-        {
-          locker_id: "2",
-          action: "sendLocker",
-          gabeta: "100",
-        },{
-          headers: {
-            Authorization: `Bearer ${TOKEN}`,
-          },
+  
+    const handleOpenDoor = async () => {
+      try {
+        const TOKEN = localStorage.getItem("token");
+        const openDoorResponse = await axios.post(
+          `${api}/mqtt/`,
+          {
+            locker_id: id_locker,
+            action: "sendLocker",
+            gabeta: scale,
+          },{
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+            },
+          }
+        );
+    
+        if (!openDoorResponse.data.error) {
+          setOpenDoor(true);
+    
+          Swal.fire({
+            title: "Locker Abierto",
+            text: `El locker se ha abierto correctamente.`,
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+        } else {
+          Swal.fire({
+            title: "Error",
+            text: `No se pudo abrir el locker.`,
+            icon: "error",
+            confirmButtonText: "OK",
+          });
         }
-      );
-
-      if (!openDoorResponse.data.error) {
-        setOpenDoor(true);
-
+      } catch (error) {
+        console.error(error);
         Swal.fire({
-          title: "Locker Abierto",
-          text: `El locker se ha abierto correctamente.`,
-          icon: "success",
+          title: "Error",
+          text: `No se pudo abrir el locker.`,
+          icon: "error",
           confirmButtonText: "OK",
         });
+      }
+    };
+    
 
-        const weightResponse = await axios.post(
-          "http://192.168.1.95:3000/api/v1/mqtt/",
+    const handleCheckDoor = async () => {
+      try {
+        const checkDoorResponse = await axios.post(
+          `${api}/api/v1/mqtt/`,
           {
             locker_id: "2",
-            action: "getWeight",
+            action: "checkDoor", // Cambiado a "checkDoor"
             gabeta: "100",
           },{
             headers: {
@@ -53,40 +75,36 @@ const Step2 = ({ handleClick, onWeightChange }) => {
             },
           }
         );
-
-        if (!weightResponse.data.error) {
-          const message = weightResponse.data.message;
-          const weight = message.split(':')[1].trim();  // Obtener la parte después de ':'
-          setWeight(weight);
-          onWeightChange(weight);
-          handleClick(3);
-          console.log(weight);
-          
+    
+        if (!checkDoorResponse.data.error) {
+          const doorStatus = checkDoorResponse.data.status; // Ajusta según tu API
+          Swal.fire({
+            title: "Estado de la Puerta",
+            text: `La puerta está ${doorStatus}.`, // Muestra el estado
+            icon: "info",
+            confirmButtonText: "OK",
+          });
         } else {
           Swal.fire({
             title: "Error",
-            text: `No se pudo obtener el peso del paquete.`,
+            text: `No se pudo obtener el estado de la puerta.`,
             icon: "error",
             confirmButtonText: "OK",
           });
         }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error",
+          text: `No se pudo obtener el estado de la puerta.`,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
+    };
+    
 
-      if(weight && openDoor){
-        handleClick(3);
-      }
-
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        title: "Error",
-        text: `No se pudo abrir el locker.`,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
-  };
-
+    
   const handleStartWeighing = () => {
     // Simular el pesado con un valor fijo de 19
     const weight = "19"; // Simulamos que se detecta un peso de 19
