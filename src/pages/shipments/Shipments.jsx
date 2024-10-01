@@ -4,12 +4,13 @@ import Step2 from "./shipment_steps/Step2";
 import Step3 from "./shipment_steps/Step3";
 import Step4 from "./shipment_steps/Step4";
 import Step5 from "./shipment_steps/Step5";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import { get } from "react-hook-form";
 
 export default function Shipment() {
-
+  const navigate = useNavigate();
   const { getGabetas } = useAuth();
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -36,14 +37,14 @@ export default function Shipment() {
   const handleCPChange = (value) => {
     setDestinationCP(value);
     if (value === "00000") {
-      window.location.href = "/login";
+      navigate("/login");
     }
   };
 
   const handleSenderCPChange = (value) => {
     setSenderCP(value);
     if (value === "00000") {
-      window.location.href = "/login";
+      navigate("/login");
     }
   };
 

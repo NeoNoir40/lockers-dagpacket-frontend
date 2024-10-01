@@ -46,11 +46,11 @@ export const fetchGabetasByLockerId = async (id_locker) => {
   }
 };
 
-export const fetchGabetasAviable = async () => {
+export const fetchGabetasAviable = async (id) => {
   try {
     const token = localStorage.getItem("token");
     const response = await axios.get(
-      `${api}/gabeta/gabeta-aviable`, // Usar la URL del .env
+      `${api}/gabeta/gabeta-aviable/${id}`, // Usar la URL del .env
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -126,3 +126,21 @@ export const updateSaturation = async (data) => {
     throw e;
   }
 };
+
+export const fetchGavetaInfoById = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(
+      `${api}/gabeta/info/${id}`, // Usar la URL del .env
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}

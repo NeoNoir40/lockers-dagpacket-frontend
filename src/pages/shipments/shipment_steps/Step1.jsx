@@ -4,6 +4,8 @@ import Logo from "../../../assets/images/logo.webp";
 import animationMap from "../../../assets/lotties/js/map.json";
 import { useState, useEffect } from "react";
 import VirtualKeyboard from "../../../components/VirtualKeyboard.jsx/VirtualKerboard";
+import { useAuth } from "../../../../context/AuthContext";
+import { get } from "react-hook-form";
 export default function Step1({
   handleClick,
   destinationCP,
@@ -14,7 +16,7 @@ export default function Step1({
   const [packageType, setPackageType] = useState("Sobre");
   const [inputValue, setInputValue] = useState('');
   const [activeInput, setActiveInput] = useState(null);
-
+  const {getGabetas} = useAuth();
   const handleFocus = (inputRef) => {
     setActiveInput(inputRef);
   };
@@ -50,6 +52,12 @@ export default function Step1({
     handleContinue();
   };
 
+  
+  useEffect(()=>{
+    if(handleContinue){
+      getGabetas();
+    }
+  },[])
   return (
     <>
       <img src={Logo} alt="DagPacketLogo" className="fixed top-16 w-1/4 mt-4" />
