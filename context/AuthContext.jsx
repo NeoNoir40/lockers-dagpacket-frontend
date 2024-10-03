@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [gabetas, setGabetas] = useState([]);
   const [locker_id, setLockerId] = useState(null);
-
+  const id_locker = localStorage.getItem("id_locker");
   const loginRequest = async (data) => {
     try {
       const response = await loginLocker(data);
@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
       }
       localStorage.setItem('zipCode', response.user.locker_info.cp);
       localStorage.setItem("locker_id", response.user.locker_info.id_locker);
+      localStorage.setItem('id_locker', response.user.locker_info._id);
       localStorage.setItem('user_id', response.user.user_id);
       localStorage.setItem("token", response.token);
       setUser(response.user);
@@ -89,11 +90,10 @@ export const AuthProvider = ({ children }) => {
   const getGabetas = async () => {
     try {
       // Obtén el id_locker desde el estado del usuario o desde localStorage
-      const lockerId = locker_id; // Asumiendo que locker_id es el ID del locker actual
   
       // Llama a la función para obtener las gabetas disponibles, pasando el id_locker
-      const response = await fetchGabetasAviable(lockerId);
-      console.log(response);
+      const response = await fetchGabetasAviable(id_locker);
+      console.log(response.message);
   
       if (response.error) {
         console.log("Error al obtener las gabetas");
@@ -101,15 +101,34 @@ export const AuthProvider = ({ children }) => {
       }
   
       if (response.success && response.message.length > 0) {
-        const idGabeta = response.message[0].id_gabeta;
-        const _idgabeta = response.message[0]._id;
+        // Almacena todas las gabetas en el estado
+        setGabetas(response.message);
   
-        localStorage.setItem("_idgabeta", _idgabeta);
-        localStorage.setItem("idGabeta", idGabeta);
+        // Verifica si todas las gabetas son de tipo "Pesa" o "Impresora"
+        const todasGabetasInvalidas = response.message.every(
+          (gabeta) => gabeta.type === "Pesa" || gabeta.type === "Impresora"
+        );
   
-        console.log(`_idgabeta almacenado: ${_idgabeta}`);
-        console.log(`idGabeta almacenado: ${idGabeta}`);
-        setGabetas(response.message); // Asegúrate de que `setGabetas` reciba solo el array de gabetas
+        if (todasGabetasInvalidas) {
+          Swal.fire({
+            title: "Error",
+            text: "No hay gabetas disponibles",
+            icon: "error",
+            confirmButtonText: "Aceptar",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = "/";
+            }
+          });
+          console.log("No hay gabetas disponibles");
+        } else {
+          // Si hay al menos una gabeta válida (que no sea "Pesa" ni "Impresora")
+          const idGabeta = response.message[0].id_gabeta;
+          const _idgabeta = response.message[0]._id;
+  
+          localStorage.setItem("_idgabeta", _idgabeta);
+          localStorage.setItem("idGabeta", idGabeta);
+        }
       } else {
         Swal.fire({
           title: "Error",
@@ -127,7 +146,6 @@ export const AuthProvider = ({ children }) => {
       console.log(e);
     }
   };
-  
 
 
   useEffect(() => {

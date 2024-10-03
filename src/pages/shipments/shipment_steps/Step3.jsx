@@ -149,7 +149,7 @@ export default function Step3({
     ancho: 0,
     largo: 0,
     peso: 0,
-    seguro: false,
+    seguro: 0,
     valor_declarado: 0,
   });
 

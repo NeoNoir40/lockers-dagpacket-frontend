@@ -7,15 +7,22 @@ export default function HomePageAdmin() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
-  const { user, gabetas } = useAuth();
+  const { user, gabetas, getGabetas } = useAuth();
 
+  // Fetch gabetas once when the component mounts
   useEffect(() => {
-    if (user && gabetas) {
-      setIsLoading(false);
-    } else {
-      setError("Error al cargar los datos.");
-    }
-  }, [user, gabetas]);
+    const fetchData = async () => {
+      try {
+        await getGabetas();
+        setIsLoading(false); // Set loading to false after fetching
+      } catch (e) {
+        setError("Error al cargar los datos.");
+        setIsLoading(false);
+      }
+    };
+
+    fetchData(); // Call getGabetas on mount
+  }, []); // Empty array ensures this runs only once
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -64,10 +71,10 @@ export default function HomePageAdmin() {
                   {user.locker_info.status ? "Disponible" : "No disponible"}
                 </span>
               </p>
-              <p className="text-lg p-1 font-normal">Cantidad de gabetas: {user.locker_info.quant_gabetas}</p>
+              <p className="text-lg p-1 font-normal">Cantidad de gavetas: {user.locker_info.quant_gabetas}</p>
             </div>
             <div className="bg-[#2C2C2C] text-white p-10 rounded-lg shadow-lg">
-              <h1 className="text-2xl text-center mb-5">Gabetas del locker</h1>
+              <h1 className="text-2xl text-center mb-5">Gavetas del locker</h1>
               <table className="table-auto w-full text-left">
                 <thead>
                   <tr>

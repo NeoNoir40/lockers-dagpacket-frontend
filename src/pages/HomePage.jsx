@@ -21,7 +21,10 @@ const HomePage = () => {
 
 
 
-  
+  const getMetadata = async () => {
+      window.navigator.userAgent
+
+  }
 
 
  
