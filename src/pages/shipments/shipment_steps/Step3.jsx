@@ -6,6 +6,13 @@ import PaqueteExLogo from "../../../assets/images/logos/Paquetexpress Logo Vecto
 import axios from "axios";
 import ShipmentServices from "../../../components/ShipmentServices";
 import ShipmentInfo from "../../../components/ShipmentInfo";
+
+import {
+  FormSection,
+  InputField,
+  SenderFormSection,
+  PackageFormSection,
+} from "../../../components/Shipment/FormSection";
 import { useAuth } from "../../../../context/AuthContext";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 
@@ -18,89 +25,46 @@ const logoMap = {
 };
 
 const inputFields = [
-  { label: "Nombre", key: "name", type: "text" },
-  { label: "Colonia", key: "colony", type: "text" },
-  { label: "Calle", key: "street", type: "text" },
-  { label: "Ciudad", key: "city", type: "text" },
-  { label: "Estado", key: "state", type: "text" },
-  { label: "País", key: "country", type: "text" },
-  { label: "Teléfono", key: "phone", type: "tel" },
-  { label: "Correo Electrónico", key: "email", type: "email" },
+  { label: "Dirección", key: "address", type: "text", id: "1address" },
+  { label: "Nombre", key: "name", type: "text", id: "1name" },
+  { label: "Correo Electrónico", key: "email", type: "email", id: "8email" },
+  { label: "Teléfono", key: "phone", type: "tel", id: "7phone" },
+  { label: "País", key: "country", type: "text", id: "6country" },
+  { label: "Código Postal", key: "zipCode", type: "text", id: "1zipCode" },
+  { label: "Estado", key: "state", type: "text", id: "5state" },
+  { label: "Ciudad", key: "city", type: "text", id: "4city" },
+  { label: "Colonia", key: "colony", type: "text", id: "2colony" },
+  { label: "Calle", key: "street", type: "text", id: "3street" },
+  {
+    label: "Número Exterior",
+    key: "extNumber",
+    type: "text",
+    id: "9extNumber",
+  },
+  {
+    label: "Número Interior",
+    key: "intNumber",
+    type: "text",
+    id: "10intNumber",
+  },
+  { label: "Referencias", key: "references", type: "text", id: "11references" },
+];
+
+const inputFieldsSender = [
+  { label: "Nombre", key: "nameSender", type: "text", id: "s1name" },
+  { label: "Teléfono", key: "phoneSender", type: "tel", id: "s7phone" },
+  {
+    label: "Correo Electrónico",
+    key: "emailSender",
+    type: "email",
+    id: "s8email",
+  },
 ];
 
 const packageFields = [
-  { label: "Descripción", key: "description", type: "text" },
+  { label: "Descripción", key: "description", type: "textarea" },
   { label: "Seguro", key: "insurance", type: "checkbox" },
 ];
-
-
-
-const PackageFormSection = ({ title, data, onChange, disabled }) => (
-  <div className="w-full bg-white p-6 rounded-lg shadow-md">
-    <h3 className="text-2xl font-semibold mb-4">{title}</h3>
-    <div className="grid grid-cols-1 gap-5">
-      {packageFields.map(({ label, key }) => (
-        <div key={key} className="flex items-center">
-          {key === "insurance" ? (
-            <>
-              <label htmlFor="insurance-checkbox" className="mr-2 text-orange-500 font-normal">
-                {label}
-              </label>
-              <input
-                type="checkbox"
-                id="insurance-checkbox"
-                checked={data[key] || false}
-                onChange={(e) => onChange({ ...data, [key]: e.target.checked })}
-                disabled={disabled}
-              />
-            </>
-          ) : (
-            <InputField
-              label={label}
-              value={data[key]}
-              type="text"
-              onChange={(e) => onChange({ ...data, [key]: e.target.value })}
-              disabled={disabled}
-            />
-          )}
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-
-const InputField = ({ label, value, onChange, disabled, type }) => (
-  <input
-    type={type}
-    placeholder={label}
-    value={value || ""}
-    onChange={onChange}
-    disabled={disabled}
-    className={`border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 ${
-      disabled ? "bg-gray-200 cursor-not-allowed" : ""
-    }`}
-    
-  />
-  
-);
-
-const FormSection = ({ title, data, onChange, disabled }) => (
-  <div className=" bg-white p-6 rounded-lg shadow-md">
-    <h3 className="text-2xl font-semibold mb-4">{title}</h3>
-    <div className="grid grid-cols-1 gap-4">
-      {inputFields.map(({ label, key }) => (
-        <InputField
-          key={key}
-          label={label}
-          value={data[key]}
-          onChange={(e) => onChange({ ...data, [key]: e.target.value })}
-          disabled={disabled}
-        />
-      ))}
-    </div>
-  </div>
-);
 
 export default function Step3({
   destinationCP,
@@ -112,45 +76,34 @@ export default function Step3({
   handlePackageDataChange,
 }) {
   //Nuevos estados para el flujo de la cotización
-  const {getGabetas} = useAuth();
-
+  const { getGabetas } = useAuth();
   const [step1, setStep1] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [step3, setStep3] = useState(false);
   const [step4, setStep4] = useState(false);
   const [step5, setStep5] = useState(false);
   //
-  const cp = localStorage.getItem('zipCode')
+  const cp = localStorage.getItem("zipCode");
   const [isConfirmedPackage, setIsConfirmedPackage] = useState(false);
   const [goToDetails, setGoToDetails] = useState(false);
   const [isConfirmedQuote, setIsConfirmedQuote] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [selectedQuote, setSelectedQuote] = useState(null);
-  const [inputValue, setInputValue] = useState("");
+  const [activeFormSender, setActiveFormSender] = useState(true);
+  const [activeFormRecipient, setActiveFormRecipient] = useState(false);
 
-  const handleKeyPress = (key) => {
-    if (key === 'C') {
-      setInputValue(""); // Limpiar el input
-    } else if (key === 'OK') {
-      // Aquí puedes manejar el valor ingresado
-      console.log("Valor ingresado:", inputValue);
-    } else {
-      setInputValue((prev) => prev + key); // Agregar el número al input
-    }
-  };
-  
   const [quote, setQuote] = useState(null);
   const [data, setData] = useState({
     pais_origen: "MX",
     pais_destino: "MX",
     cp_origen: "", // Inicialmente vacío, se actualizará con los datos del paquete
     cp_destino: "", // Se actualizará con el código postal del destinatario
-    alto: 0,
-    ancho: 0,
-    largo: 0,
-    peso: 0,
+    alto: 10,
+    ancho: 10,
+    largo: 10,
+    peso: 2,
     seguro: false,
-    valor_declarado: 0,
+    valor_declarado: 250,
   });
 
   useEffect(() => {
@@ -177,12 +130,12 @@ export default function Step3({
       pais_destino: "MX",
       cp_origen: cp,
       cp_destino: shippingData.recipient.zipCode,
-      alto: shippingData.package.height,
-      ancho: shippingData.package.width,
-      largo: shippingData.package.length,
-      peso: shippingData.package.weight,
+      alto: 10,
+      ancho: 10,
+      largo: 10,
+      peso: 1,
       seguro: shippingData.package.insurance || false,
-      valor_declarado: shippingData.package.value,
+      valor_declarado: 200,
     };
 
     setStep3(true);
@@ -194,19 +147,14 @@ export default function Step3({
     console.log("Click en confirmar");
   };
 
-
-
   const fetchQuote = async (dataToSend) => {
     try {
       const TOKEN = localStorage.getItem("token");
-      const response = await axios.post(
-        `${api}/shipping/quote`,
-        dataToSend,{
-          headers: {
-            Authorization: `Bearer ${TOKEN}`,
-          },
-        }
-      );
+      const response = await axios.post(`${api}/shipping/quote`, dataToSend, {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      });
       console.log("Datos enviados:", dataToSend);
       console.log("Quote:", response.data);
       setQuote(response.data);
@@ -236,6 +184,24 @@ export default function Step3({
     handleCompanySelection(quote);
   };
 
+  const handleFormSender = () => {
+    setActiveFormSender(false);
+    setActiveFormRecipient(true);
+  };
+
+  const handleFormRecipient = () => {
+    setActiveFormRecipient(false);
+  };
+
+  const handleEditFormRecipient = () => {
+    setActiveFormRecipient(true);
+  };
+
+  const editFormSender = () => {
+    setActiveFormSender(true);
+    setActiveFormRecipient(false);
+  };
+
   const handleStep5 = () => {
     setStep5(true);
     setStep4(false);
@@ -254,30 +220,73 @@ export default function Step3({
           <button
             onClick={handleContinueStep}
             className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-            Continuar 4
+            Continuar 5
           </button>
         </>
       )}
       {step4 && (
         <>
           <div className="grid grid-cols-2 gap-10">
-            <FormSection
+            <SenderFormSection
               title="Datos del Remitente"
+              inputFields={inputFieldsSender}
               data={shippingData.sender}
               onChange={handleSenderDataChange}
               disabled={false} // Habilitar inputs
+              active={activeFormSender}
+              activeRecipient={activeFormRecipient}
             />
             <FormSection
               title="Datos del Destinatario"
+              inputFields={inputFields}
               data={shippingData.recipient}
               onChange={handleRecipientDataChange}
               disabled={false} // Habilitar inputs
+              activeRecipient={activeFormRecipient}
             />
-            <button
+            {/* <button
               onClick={handleStep5}
               className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
               Continuar 4
-            </button>
+            </button> */}
+            {activeFormSender ? (
+              <button
+                onClick={handleFormSender}
+                className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
+                Continuar
+              </button>
+            ) : (
+              <button
+                onClick={editFormSender}
+                className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
+                Editar
+              </button>
+            )}
+            {activeFormRecipient && (
+              <button
+                onClick={handleFormRecipient}
+                className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
+                Continuar
+              </button>
+            )}
+
+            {!activeFormRecipient && !activeFormSender && (
+              <button
+                onClick={handleEditFormRecipient}
+                className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
+                Editar
+              </button>
+            )}
+
+            {!activeFormRecipient && !activeFormSender ? (
+              <button
+                onClick={handleStep5}
+                className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
+                Continuar
+              </button>
+            ) : (
+              <></>
+            )}
           </div>
         </>
       )}
@@ -320,12 +329,12 @@ export default function Step3({
         <div>
           <div className="flex gap-8">
             <PackageFormSection
+              packageFields={packageFields}
               title="Datos del Paquete"
               data={shippingData.package}
               onChange={handlePackageDataChange}
               disabled={false} // Habilitar inputs
             />
-          
           </div>
 
           <button

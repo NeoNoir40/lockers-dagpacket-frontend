@@ -9,15 +9,15 @@ export default function ShipmentInfo({ data }) {
           <h2 className="text-xl font-medium mb-2">Remitente</h2>
           <p className="mb-1">
             <strong className="font-semibold">Nombre:</strong>{" "}
-            {data.sender.name}
+            {data.sender.nameSender}
           </p>
           <p className="mb-1">
             <strong className="font-semibold">Teléfono:</strong>{" "}
-            {data.sender.phone}
+            {data.sender.phoneSender}
           </p>
           <p className="mb-1">
             <strong className="font-semibold">Correo electrónico:</strong>{" "}
-            {data.sender.email}
+            {data.sender.emailSender}
           </p>
           <p className="mb-1">
             <strong className="font-semibold">Calle:</strong>{" "}
@@ -82,22 +82,7 @@ export default function ShipmentInfo({ data }) {
         <div>
           <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
             <h2 className="text-xl font-medium mb-2">Paquete</h2>
-            <p className="mb-1">
-              <strong className="font-semibold">Alto:</strong>{" "}
-              {data.package.height}
-            </p>
-            <p className="mb-1">
-              <strong className="font-semibold">Ancho:</strong>{" "}
-              {data.package.width}
-            </p>
-            <p className="mb-1">
-              <strong className="font-semibold">Largo:</strong>{" "}
-              {data.package.length}
-            </p>
-            <p className="mb-1">
-              <strong className="font-semibold">Peso:</strong>{" "}
-              {data.package.weight}
-            </p>
+           
             <p className="mb-1">
               <strong className="font-semibold">Seguro:</strong>{" "}
               {data.package.insurance ? "Sí" : "No"}

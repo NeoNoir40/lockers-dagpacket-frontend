@@ -182,7 +182,7 @@ const HomePage = () => {
             <img src={Logo} alt="DagPacket Logo" className="w-1/2 mb-12" />
             <h1 className="text-4xl font-semibold mx-8">
               Recoge tu paquete en
-              <span className="text-orange-500">nuestros lockers</span>
+              <span className="text-orange-500"> nuestros Lockers</span>
             </h1>
             <p className="text-2xl font-normal mx-8">
               Escanea tu código QR o ingresa tu código y obtén de forma rápida y
