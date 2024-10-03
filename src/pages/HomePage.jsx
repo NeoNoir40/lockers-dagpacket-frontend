@@ -19,80 +19,15 @@ const HomePage = () => {
     window.location.href = path;
   };
 
-  const [useLockerId, setLockerId] = useState("");
-  const [idGabeta, setIdGabeta] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [scale, setScale] = useState("");
-  const [hide, setHiden] = useState(false);
-  console.log(hide)
-  const handleLocker = (data) => {
-    try {
-      localStorage.setItem("locker_id", data);
 
-      const lockerid = localStorage.getItem("locker_id");
 
-      if (!lockerid) {
-        return console.error("No se pudo obtener el id del locker");
-      }
+  
 
-      console.log("se seteo el locker correctamente");
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
-  const handleZipCode = (data) => {
-    try {
-      localStorage.setItem("zipCode", data);
-
-      const scaleid = localStorage.getItem("zipCode");
-
-      if (!scaleid) {
-        return console.error("No se pudo obtener el codigo postal del lcoker");
-      }
-    } catch (error) {
-      console.log("Ocurrio un error" + error);
-    }
-  };
-
-  useEffect(() => {
-    localStorage.setItem("scale", 100);
-
-    if (zipCode && useLockerId === null) {
-      setHiden(true);
-      console.log("No se han definido las variables de las pesas y de locker");
-    }else{
-
-    }
-  }, []);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleLocker(useLockerId);
-    handleZipCode(zipCode);
-  };
-
+ 
   return (
     <main className="flex flex-col w-full min-h-[100vh] bg-white overflow-hidden">
-      {!hide && (
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            className="w-1/4"
-            placeholder="lockerid"
-            value={useLockerId}
-            onChange={(e) => setLockerId(e.target.value)}
-          />
-          <input
-            type="text"
-            className=" w-1/4"
-            placeholder="zipCode"
-            value={zipCode}
-            onChange={(e) => setZipCode(e.target.value)}
-          />
-          <button type="submit">Submit</button>
-        </form>
-      )}
+      
       <div id="topSection" className="grid grid-cols-2 w-full h-[55vh]">
         <div className="flex flex-col gap-4 justify-center items-center">
           <img src={Logo} alt="Logo" className="mb-12 w-1/2" />

@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
         console.log("No hay token");
         return;
       }
+      localStorage.setItem('zipCode', response.user.locker_info.cp);
       localStorage.setItem("locker_id", response.user.locker_info.id_locker);
       localStorage.setItem('user_id', response.user.user_id);
       localStorage.setItem("token", response.token);
@@ -41,6 +42,7 @@ export const AuthProvider = ({ children }) => {
       setLockerId(response.user.locker_info._id);
       console.log(response.user.locker_info._id);
       setIsAuthenticated(true);
+
     } catch (e) {
       console.log(e);
     }
@@ -86,24 +88,28 @@ export const AuthProvider = ({ children }) => {
 
   const getGabetas = async () => {
     try {
-      const response = await fetchGabetasAviable();
+      // Obtén el id_locker desde el estado del usuario o desde localStorage
+      const lockerId = locker_id; // Asumiendo que locker_id es el ID del locker actual
+  
+      // Llama a la función para obtener las gabetas disponibles, pasando el id_locker
+      const response = await fetchGabetasAviable(lockerId);
       console.log(response);
-
+  
       if (response.error) {
         console.log("Error al obtener las gabetas");
         return;
       }
-
+  
       if (response.success && response.message.length > 0) {
         const idGabeta = response.message[0].id_gabeta;
         const _idgabeta = response.message[0]._id;
-
+  
         localStorage.setItem("_idgabeta", _idgabeta);
         localStorage.setItem("idGabeta", idGabeta);
-
+  
         console.log(`_idgabeta almacenado: ${_idgabeta}`);
         console.log(`idGabeta almacenado: ${idGabeta}`);
-        setGabetas(response);
+        setGabetas(response.message); // Asegúrate de que `setGabetas` reciba solo el array de gabetas
       } else {
         Swal.fire({
           title: "Error",
@@ -121,10 +127,12 @@ export const AuthProvider = ({ children }) => {
       console.log(e);
     }
   };
+  
 
 
   useEffect(() => {
     // Solo se ejecutará al recargar la página o montar el componente
+    
     const checkLocker = async () => {
       const token = localStorage.getItem("token");
   
@@ -162,21 +170,26 @@ export const AuthProvider = ({ children }) => {
       console.log("Gabetas obtenidas", gabetas);
   
       // Buscar la gaveta que tenga el atributo type: "weighing scale"
-      const weighingScaleGabeta = gabetas.find((gabeta) => gabeta.type === "weighing scale");
+      const weighingScaleGabeta = gabetas.find((gabeta) => gabeta.type === "Pesa");
   
       if (weighingScaleGabeta) {
         // Almacenar su id en el localStorage
-        localStorage.setItem("weighing_scale_gabeta_id", weighingScaleGabeta.id_gabeta);
+        localStorage.setItem("Pesa", weighingScaleGabeta.id_gabeta);
         // console.log("Gaveta con weighing scale encontrada, ID almacenado:", weighingScaleGabeta.id_gabeta);
       } else {
-        console.log("No se encontró una gaveta con tipo 'weighing scale'");
+        console.log("No se encontró una gaveta con tipo 'Pesa'");
       }
   
       setGabetas(gabetas);
     };
   
     checkLocker(); // Solo se ejecutará una vez al montar el componente
-  }, []); // Se ejecuta solo una vez al montar el componente
+  }, [
+    locker_id
+  ]); // Se ejecuta solo una vez al montar el componente
+  
+
+
   
   return (
     <AuthContext.Provider

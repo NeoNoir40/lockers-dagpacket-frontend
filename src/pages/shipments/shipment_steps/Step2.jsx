@@ -10,7 +10,7 @@ const Step2 = ({ handleClick, onWeightChange }) => {
   const [openDoor, setOpenDoor] = useState(false);
   const [weight, setWeight] = useState("");
 const id_locker = localStorage.getItem("locker_id");
-const scale = localStorage.getItem("weighing_scale_gabeta_id");
+const scale = localStorage.getItem("Pesa");
   const handleContinue = () => {
     handleClick(3);
   };

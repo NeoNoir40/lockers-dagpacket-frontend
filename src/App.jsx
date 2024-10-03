@@ -9,6 +9,7 @@ import Login from "./pages/login/Login";
 import ProtectedRoute from "../ProtectedRoutes/ProtectedRoute";
 import HomePageAdmin from "./pages/admin/HomeAdmin";
 import Recolect from "./pages/collect/Recolect";
+import GavetaDetails from "./pages/admin/gavetaDetails";
 
 function App() {
   return (
@@ -21,9 +22,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/recolectar" element={<Recolect/>}/>
 
-          {/* <Route element={<ProtectedRoute />}> */}
+          <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<HomePageAdmin />} />
-          {/* </Route> */}
+          <Route path="/gaveta/:id/:gabeta_id" element={<GavetaDetails />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -13,16 +13,20 @@ export default function Login() {
   const onSubmit = async (data) => {
     try {
       await loginRequest(data);
+
+      if (isAuthenticated) {
+        navigate("/home");
+      }
     } catch (e) {
       console.log(e);
     }
   };
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/home");
-    }
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     navigate("/home");
+  //   }
+  // }, [isAuthenticated]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#383838] ">
@@ -33,7 +37,7 @@ export default function Login() {
           className="flex flex-col items-center space-y-4 gap-5">
           <input
             type="text"
-            placeholder="Correo"
+            placeholder="Usuario"
             {...register("username")} // Registrando el input
             className="border-2 border-gray-300 p-2 rounded-lg"
           />
