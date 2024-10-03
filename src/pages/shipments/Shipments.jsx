@@ -62,6 +62,7 @@ export default function Shipment() {
       ...prev,
       package: {
         ...prev.package,
+        package: '',
         type: value,
         height: value === "Sobre" ? 10 : prev.package.height, // Asignar 10 si es "sobre"
         width: value === "Sobre" ? 10 : prev.package.width, // Asignar 10 si es "sobre"
@@ -116,7 +117,7 @@ export default function Shipment() {
   }, []);
 
   return (
-    <body className="overflow-hidden">
+    <body className="overflow-hidden h-[100vh]">
       <header className="grid grid-cols-5 w-full h-16 ">
         {[1, 2, 3, 4, 5].map((step) => (
           <div

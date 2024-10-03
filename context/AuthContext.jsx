@@ -5,6 +5,9 @@ import {
   verifyToken,
   fetchGabetasByLockerId,
   fetchGabetasAviable,
+  verifyLockerStatus,
+
+
 } from "./auth";
 import Swal from "sweetalert2";
 
@@ -197,7 +200,8 @@ export const AuthProvider = ({ children }) => {
       } else {
         console.log("No se encontró una gaveta con tipo 'Pesa'");
       }
-  
+      
+      verifyLockerStatus();
       setGabetas(gabetas);
     };
   

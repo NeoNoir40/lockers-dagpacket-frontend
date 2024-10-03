@@ -114,7 +114,7 @@ const scale = localStorage.getItem("Pesa");
     // Mostrar la alerta con el peso detectado
     Swal.fire({
       title: "Peso Detectado",
-      text: `Se ha detectado un peso de ${weight} kg.`,
+      text: `Se ha detectado el peso`,
       icon: "info",
       confirmButtonText: "OK",
     });
@@ -127,7 +127,7 @@ const scale = localStorage.getItem("Pesa");
     <div className="step2 flex flex-col justify-center items-center gap-8 bg-white p-10 rounded-md shadow-md">
       <h1 className="text-3xl font-semibold mx-8 text-center">
         Espera a que el locker indicado se abra e
-        <span className="text-orange-500">introduce tu paquete</span> para
+        <span className="text-orange-500"> introduce tu paquete</span> para
         pesarlo
       </h1>
       <div className="flex justify-center items-center h-[40vh] w-full max-w-5xl px-4">
@@ -170,14 +170,12 @@ const scale = localStorage.getItem("Pesa");
         }}>
         Continuar
       </button>
-      <button
+      {/* <button
         onClick={handleOpenDoor}
         className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-4">
         PRUEBA DE BOTON CON MQTT
-      </button>
-      <h3 id="weight" className="text-xl">
-        {detectedWeight && `Peso: ${detectedWeight} kg`}
-      </h3>
+      </button> */}
+     
     </div>
   );
 };

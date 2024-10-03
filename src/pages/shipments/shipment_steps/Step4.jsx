@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-
+import animtaionTerminal from '../../../assets/lotties/js/payment_terminal.json'
+import Lottie from "lottie-react";
 export default function Step4({ handleStepChange }) {
   const navigate = useNavigate();
   const handlePayment = () => {
@@ -32,21 +33,39 @@ export default function Step4({ handleStepChange }) {
   useEffect(() => {
     setTimeout(() => {
       Swal.fire({
-        title: "No se pudo procesar el proceso de pago",
-        text: "Por favor contacte al soporte tecnico o intente otra vez",
+        title: "No se pudo procesar el pago correctamente",
+        text: "Por favor contacte al soporte técnico o intente de nuevo",
         icon: "error",
-        confirmButtonText: "Volver al inicio",
-      }).then(() => {
-        navigate("/");
+        showCancelButton: true, // Mostrar el segundo botón
+        confirmButtonText: "Volver al inicio", // Texto del botón principal
+        cancelButtonText: "Intentar de nuevo", // Texto del botón secundario
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Acción para "Volver al inicio"
+          navigate("/");
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          // Acción para "Intentar de nuevo"
+          // Aquí puedes hacer que el usuario intente el pago otra vez o refrescar la página
+          handleStepChange(4);
+        }
       });
     }, 2000);
-  }, []);
+  }, [navigate]);
 
   return (
-    <div className="bg-white my-5 mx-5 p-10 rounded-md ">
-      <h1 className="text-orange-500 text-2xl font-semibold">
+    <div className="flex flex-col items-center justify-center bg-white my-5 mx-5 p-10 rounded-md ">
+      <h1 className=" text-2xl font-semibold">
         Por favor realize su pago mediante la terminal de pago
       </h1>
+      <Lottie
+              animationData={animtaionTerminal}
+              loop
+              autoplay
+              background="transparent"
+              speed={1.5}
+              style={{ width: 500, height: 500 }}
+            />
+
       {/* <button
         onClick={handlePayment}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">

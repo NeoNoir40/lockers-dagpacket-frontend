@@ -6,6 +6,7 @@ import { recolectGabeta } from "../../../context/auth";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2"; // Importa SweetAlert
+import { Link } from "react-router-dom";
 import "../../assets/css/shipment/shipment.css";
 
 export default function Recolect() {
@@ -77,6 +78,12 @@ export default function Recolect() {
         ))}
       </header>
       <main className="h-[44vw] w-[100vw] flex justify-center items-center bg-gray-100 overflow-hidden">
+      <Link
+          to="/"
+          className="fixed top-16 left-4 z-40 w-1/6 mt-4 bg-gray-300 w-auto px-6 py-2 rounded-full cursor-pointer hover:bg-gray-400"
+          type="button">
+          Cancelar
+        </Link>
         {currentStep === 1 && (
           <div className="flex flex-col items-center gap-10">
             <Lottie

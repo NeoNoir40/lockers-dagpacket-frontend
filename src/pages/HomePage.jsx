@@ -11,26 +11,25 @@ import Box from "../assets/images/package.png";
 import { useNavigate } from "react-router-dom";
 import { getCode } from "country-list";
 import { Link } from "react-router-dom";
-
+import { verifyLockerStatus} from '../../context/auth'
 const HomePage = () => {
+
   const navigate = useNavigate();
 
   const handleClick = (path) => {
     window.location.href = path;
   };
 
-
-
   const getMetadata = async () => {
-      window.navigator.userAgent
+    window.navigator.userAgent;
+  };
 
-  }
 
 
- 
+
+
   return (
     <main className="flex flex-col w-full min-h-[100vh] bg-white overflow-hidden">
-      
       <div id="topSection" className="grid grid-cols-2 w-full h-[55vh]">
         <div className="flex flex-col gap-4 justify-center items-center">
           <img src={Logo} alt="Logo" className="mb-12 w-1/2" />
@@ -57,7 +56,8 @@ const HomePage = () => {
       <div className="grid grid-cols-3 bg-red-600 w-full h-[35vh]">
         <Link
           to={"/envios"}
-          className="service1 service flex flex-col justify-around items-center bg-gray-100 w-full h-full relative overflow-hidden">
+          className="service1 service flex flex-col justify-around items-center bg-gray-100 w-full h-full relative overflow-hidden"
+        >
           <div className="circle absolute w-52 h-52 bg-[#FFFFFF35] rounded-full"></div>
           <div className="flex flex-col justify-center items-center px-12 gap-1">
             <h3 className="text-3xl font-medium text-center z-10">Envíos</h3>
@@ -98,7 +98,8 @@ const HomePage = () => {
         </div>
         <div
           className="service2 service flex flex-col justify-around items-center bg-gray-100 w-full h-full relative overflow-hidden"
-          onClick={() => navigate("/recolectar")}>
+          onClick={() => navigate("/recolectar")}
+        >
           <div className="circle absolute w-52 h-52 bg-[#FFFFFF35] rounded-full"></div>
           <div className="flex flex-col justify-center items-center px-12 gap-1">
             <h3 className="text-3xl font-medium text-center z-10">
@@ -120,7 +121,7 @@ const HomePage = () => {
             <img src={Logo} alt="DagPacket Logo" className="w-1/2 mb-12" />
             <h1 className="text-4xl font-semibold mx-8">
               Recoge tu paquete en
-              <span className="text-orange-500">nuestros lockers</span>
+              <span className="text-orange-500"> nuestros Lockers</span>
             </h1>
             <p className="text-2xl font-normal mx-8">
               Escanea tu código QR o ingresa tu código y obtén de forma rápida y
@@ -138,7 +139,8 @@ const HomePage = () => {
         </div>
         <Link
           to={"/servicios"}
-          className="service3 service flex flex-col justify-around items-center bg-gray-100 w-full h-full relative overflow-hidden">
+          className="service3 service flex flex-col justify-around items-center bg-gray-100 w-full h-full relative overflow-hidden"
+        >
           <div className="circle absolute w-52 h-52 bg-[#FFFFFF35] rounded-full"></div>
           <div className="flex flex-col justify-center items-center px-12 gap-1 hover:text-white ">
             <h3 className="text-3xl font-medium text-center z-10 ">

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { fetchGavetaInfoById } from "../../../context/auth";
+import { fetchGavetaInfoById, logGaveta } from "../../../context/auth";
 import axios from "axios";
 import Swal from "sweetalert2";
-const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 
+const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
+const id_locker = localStorage.getItem("id_locker");
 
 export default function GavetaDetails() {
   const { id, gabeta_id } = useParams();
@@ -12,6 +13,44 @@ export default function GavetaDetails() {
   const [loading, setLoading] = useState(true); // Estado de carga
   const TOKEN = localStorage.getItem("token");
   const locker_id = localStorage.getItem("locker_id");
+
+  const handleLogGaveta = async (action, delivery) => {
+    const logData = {
+      gabeta_id: gabeta_id,
+      locker_id: id_locker,
+      action: action,
+      delivery: delivery ? delivery : '', // Solo añade delivery si existe
+    };
+  
+    try {
+      const logResponse = await logGaveta(logData);
+      if (logResponse.success) {
+        Swal.fire({
+          title: "Registro Exitoso",
+          text: "La acción de la gaveta se ha registrado correctamente.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      } else {
+        console.error("Data:", logData);
+
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo registrar la acción de la gaveta.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error registrando la acción de la gaveta:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error al registrar la acción de la gaveta.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
 
   const handleOpenDoor = async () => {
     try {
@@ -36,6 +75,8 @@ export default function GavetaDetails() {
           icon: "success",
           confirmButtonText: "OK",
         });
+        // Llama a la función de log al abrir la gaveta
+        await handleLogGaveta("Abrir Gaveta", gaveta.delivery);
       } else {
         Swal.fire({
           title: "Error",
@@ -55,9 +96,9 @@ export default function GavetaDetails() {
     }
   };
 
-  const handleStatusChange = async (data) => {
+  const handleStatusChange = async (newStatus) => {
     try {
-      const response = await axios.patch(`${api}/gabeta/update-status/${id}`, { status: data }, {
+      const response = await axios.patch(`${api}/gabeta/update-status/${id}`, { status: newStatus }, {
         headers: {
           Authorization: `Bearer ${TOKEN}`,
         },
@@ -70,8 +111,10 @@ export default function GavetaDetails() {
           icon: "success",
           confirmButtonText: "Aceptar",
         });
+        // Llama a la función de log al cambiar el estatus
+        const action = newStatus ? "Activar Gaveta" : "Desactivar Gaveta";
+        await handleLogGaveta(action);
         // Volver a obtener la información de la gaveta
-        
         fetchData();
       } else {
         Swal.fire({
@@ -192,13 +235,11 @@ export default function GavetaDetails() {
               </button>
             ) : (
               <button 
-                onClick={() => handleStatusChange(true)} // Cambiar el estado aquí
+                onClick={() => handleStatusChange(true)} // Cambiar el estatus a activo
                 className="bg-green-500 p-2 rounded-md text-center">
                 Activar Gaveta
               </button>
             )}
-
-            {/* Puedes agregar más acciones aquí */}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import axios from "axios";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
-
+import Swal from "sweetalert2";
 export const loginLocker = async (data) => {
   try {
     const response = await axios.post(
@@ -63,6 +63,65 @@ export const fetchGabetasAviable = async (id) => {
     throw e;
   }
 };
+
+export const verifyLockerStatus = async (id) => {
+  try {
+    const locker_id = localStorage.getItem("id_locker");
+
+    const token = localStorage.getItem("token");
+    const response = await axios.post(
+      `${api}/locker/status`,
+      {
+        id: locker_id,
+      }, // Usar la URL del .env
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    // Si el estado es false, muestra error y retorna false
+    if (response.data.status !== true) {
+      Swal.fire({
+        title: "Error",
+        text: `Locker no disponible.`,
+        footer: "Por favor, intente con otro locker.",
+        icon: "error",
+        showConfirmButton: false,
+        allowOutsideClick: false, // Deshabilita el clic fuera del modal
+        allowEscapeKey: false, // Deshabilita la tecla ESC
+
+      });
+      return false; // Retorna false si no está disponible
+    }
+
+    return true; // Retorna true si está disponible
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}
+
+export const logGaveta = async (data) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.post(
+      `${api}/gaveta-log/gaveta-log`, // Usar la URL del .env
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}
+
 
 export const recolectGabeta = async (pin) => {
   try {
