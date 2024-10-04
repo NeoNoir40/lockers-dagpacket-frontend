@@ -16,7 +16,10 @@ const scale = localStorage.getItem("Pesa");
   };
 
   
+
+  
     const handleOpenDoor = async () => {
+      // console.log("Abriendo locker...", scale);
       try {
         const TOKEN = localStorage.getItem("token");
         const openDoorResponse = await axios.post(
@@ -34,7 +37,41 @@ const scale = localStorage.getItem("Pesa");
     
         if (!openDoorResponse.data.error) {
           setOpenDoor(true);
-    
+          const weightResponse = await axios.post(
+            `${api}/api/v1/mqtt/`,
+            {
+              locker_id: "2",
+              action: "getWeight",
+              gabeta: "100",
+            },{
+              headers: {
+                Authorization: `Bearer ${TOKEN}`,
+              },
+            }
+          );
+
+          if (!weightResponse.data.error) {
+            const message = weightResponse.data.message; // Ajusta según tu API
+            const weight = message.split(':')[1].trim();  // Obtener la parte después de ':'
+            setWeight(weight);
+            onWeightChange(weight);
+            handleClick(3);
+            console.log("Peso detectado:", weight);
+            Swal.fire({
+              title: "Peso Detectado",
+              text: `El peso detectado es de ${weight} kg.`,
+              icon: "info",
+              confirmButtonText: "OK",
+            });
+          } else {
+            Swal.fire({
+              title: "Error",
+              text: `No se pudo obtener el peso.`,
+              icon: "error",
+              confirmButtonText: "OK",
+            });
+          }
+          
           Swal.fire({
             title: "Locker Abierto",
             text: `El locker se ha abierto correctamente.`,
@@ -84,6 +121,9 @@ const scale = localStorage.getItem("Pesa");
             icon: "info",
             confirmButtonText: "OK",
           });
+
+       
+      
         } else {
           Swal.fire({
             title: "Error",
@@ -152,7 +192,7 @@ const scale = localStorage.getItem("Pesa");
       </div>
 
       <button
-        onClick={handleStartWeighing}
+        onClick={handleOpenDoor}
         className="px-10 py-4 bg-orange-500 text-white text-bold text-xl rounded-full"
         id="startWeighingButton"
         style={{
@@ -170,11 +210,11 @@ const scale = localStorage.getItem("Pesa");
         }}>
         Continuar
       </button>
-      {/* <button
+       {/* <button
         onClick={handleOpenDoor}
         className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-4">
         PRUEBA DE BOTON CON MQTT
-      </button> */}
+      </button>  */}
      
     </div>
   );
