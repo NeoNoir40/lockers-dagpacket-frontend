@@ -258,7 +258,7 @@ export default function Step3({
     if (!shippingData.recipient.city) {
       errors.push("Ciudad");
     }
-    if (!shippingData.recipient.colonia) {
+    if (!shippingData.recipient.colony) {
       errors.push("Colonia");
     }
     if (!shippingData.recipient.street) {

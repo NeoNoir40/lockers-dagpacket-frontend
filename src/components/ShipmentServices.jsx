@@ -58,8 +58,10 @@ export default function ShipmentServices({
             const logo = logoMap[service.proveedor] || "";
             services.push(
               <div
+              
                 key={service.idServicio}
-                className={`mb-4 p-4 border rounded-md shadow-lg cursor-pointer ${
+                className={`mb-4 p-4 border rounded-md shadow-lg cursor-pointer  
+                  ${
                   selectedQuote?.idServicio === service.idServicio
                     ? "border-orange-400"
                     : ""
@@ -68,7 +70,7 @@ export default function ShipmentServices({
                 <img
                   src={logo}
                   alt={`${service.proveedor} logo`}
-                  className="h-12 mb-2"
+                  className="h-8 mb-2"
                 />
                 <h2 className="font-bold">{service.proveedor}</h2>
                 <p>Servicio: {service.nombre_servicio}</p>
@@ -77,11 +79,12 @@ export default function ShipmentServices({
                 <p>Kilos a cobrar: {service.kilos_a_cobrar}</p>
                 <p>Zona: {service.zona}</p>
                 <p>
+                  
                   Cobertura especial: {service.cobertura_especial === "FALSE" ? "No" : "Sí"}
                 </p>
                 <button
                   onClick={() => handleSelectQuote(service)}
-                  className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-4"
+                  className="bg-orange-500 text-white text-lg font-semibold px-6 py-3 rounded-lg mt-4"
                 >
                   Seleccionar
                 </button>
@@ -109,9 +112,10 @@ export default function ShipmentServices({
   }
 
   return (
-    <div className="p-4 bg-white rounded-md shadow-lg">
+    <div className="p-4 bg-white rounded-md shadow-lg mt-10">
       <h1 className="text-xl font-bold mb-4">Información de cotización</h1>
-      <div className="grid grid-cols-4 gap-5">{renderServices()}</div>
+      <div className="flex flex-wrap gap-2  items-center justify-center">
+      {renderServices()}</div>
       {provedorPrincipal && <p>Proveedor Principal: {provedorPrincipal}</p>} {/* Mostrar el proveedor principal */}
     </div>
   );

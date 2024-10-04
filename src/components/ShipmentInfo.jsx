@@ -1,4 +1,9 @@
+import { useAuth } from "../../context/AuthContext";
+
 export default function ShipmentInfo({ data }) {
+  const { user  } = useAuth();
+  console.log(user.locker_info  );
+  const locker_info = user.locker_info;
   console.log(data);
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg mt-2">
@@ -21,23 +26,27 @@ export default function ShipmentInfo({ data }) {
           </p>
           <p className="mb-1">
             <strong className="font-semibold">Calle:</strong>{" "}
-            {data.sender.street}
+            {locker_info.street}
           </p>
           <p className="mb-1">
             <strong className="font-semibold">Colonia:</strong>{" "}
-            {data.sender.colony}
+            {locker_info.ubication}
           </p>
           <p className="mb-1">
             <strong className="font-semibold">Ciudad:</strong>{" "}
-            {data.sender.city}
+            {locker_info.city}
           </p>
           <p className="mb-1">
             <strong className="font-semibold">Estado:</strong>{" "}
-            {data.sender.state}
+            {locker_info.state}
           </p>
           <p className="mb-1">
             <strong className="font-semibold">País:</strong>{" "}
-            {data.sender.country}
+            {locker_info.country}
+          </p>
+          <p className="mb-1">
+            <strong className="font-semibold">Código Postal:</strong>{" "}
+            {locker_info.cp}
           </p>
         </div>
         <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
@@ -82,7 +91,10 @@ export default function ShipmentInfo({ data }) {
         <div>
           <div className="bg-gray-100 p-4 rounded-lg shadow-sm">
             <h2 className="text-xl font-medium mb-2">Paquete</h2>
-           
+            <p className="mb-1">
+              <strong className="font-semibold">Tipo:</strong>{" "}
+              {data.package.type}
+            </p>
             <p className="mb-1">
               <strong className="font-semibold">Seguro:</strong>{" "}
               {data.package.insurance ? "Sí" : "No"}
