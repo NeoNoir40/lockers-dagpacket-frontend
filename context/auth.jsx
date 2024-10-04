@@ -1,6 +1,7 @@
 import axios from "axios";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 import Swal from "sweetalert2";
+
 export const loginLocker = async (data) => {
   try {
     const response = await axios.post(
@@ -202,4 +203,40 @@ export const fetchGavetaInfoById = async (id) => {
     console.log(e);
     throw e;
   }
+}
+
+
+export const phoneRecharge = async (data) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.post(
+      `${api}/emida/recharge`, // Usar la URL del .env
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+if(response.data.result.PinDistSaleResponse.ResponseCode == '51'){
+  Swal.fire({
+    title: 'Error',
+    text: `${response.data.result.PinDistSaleResponse.ResponseMessage}`,
+    icon: 'error',
+    confirmButtonText: 'Intentar de nuevo',
+  })
+}
+    return response.data;
+  } catch (e) {
+   Swal.fire({
+    title: 'Error',
+    text: `${e.response.data.message}`,
+    icon: 'error',
+    confirmButtonText: 'Intentar de nuevo',
+  })
+    console.log(e);
+    throw e;
+  }
+  // console.log(data);
 }
