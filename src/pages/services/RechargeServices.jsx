@@ -9,6 +9,7 @@ export default function RechargeServices() {
   const [currentStep, setCurrentStep] = useState(1); // Start at step 1
   const [selectedService, setSelectedService] = useState("recargas"); // Start with recharge selected
   const [service, setService] = useState([]);
+  const [scan, setScan] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -46,9 +47,7 @@ export default function RechargeServices() {
   // Function to fetch services from the API
   const fetchServices = async () => {
     try {
-      const response = await axios.get(
-        `${api}/emida/products`
-      );
+      const response = await axios.get(`${api}/emida/products`);
       setService(response.data);
 
       // Extract unique categories for the filter bar
@@ -67,6 +66,21 @@ export default function RechargeServices() {
     }
   };
 
+  const fetchPaymentServices = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(`${api}/scans`, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Incluye el token en los headers
+        },
+      });
+      setScan(response.data.data);
+      console.log("Servicios obtenidos:", response.data); // Aquí puedes ver los datos de la API
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    }
+  };
+
   // Filter services by selected category
   const filteredServices =
     selectedCategory === null
@@ -75,6 +89,7 @@ export default function RechargeServices() {
 
   useEffect(() => {
     fetchServices();
+    fetchPaymentServices();
   }, [selectedService]);
 
   return (
@@ -114,25 +129,22 @@ export default function RechargeServices() {
 
         {currentStep === 2 && selectedService === "recargas" && (
           <>
-            {/* Category selection bar */}
-          
-            {/* Show filtered services */}
             <div>
-            <div className="flex justify-center mt-4">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`mx-2 px-4 py-2 rounded-md ${
-                    selectedCategory === category
-                      ? "bg-orange-500 text-white"
-                      : "bg-gray-300"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
+              <div className="flex justify-center mt-4">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`mx-2 px-4 py-2 rounded-md ${
+                      selectedCategory === category
+                        ? "bg-orange-500 text-white"
+                        : "bg-gray-300"
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
               {filteredServices.length > 0 ? (
                 <MobileServices
                   service={filteredServices}
@@ -143,6 +155,24 @@ export default function RechargeServices() {
               )}
             </div>
           </>
+        )}
+        {currentStep === 2 && selectedService === "pagos" && (
+       <>
+       {scan.map((scaner)=>(
+           <div
+           key={scaner._id}
+           style={{ border: "1px solid red", padding: "10px" }} // Agrega estos estilos para ver los contenedores
+           className="bg-white p-4 rounded shadow cursor-pointer hover:bg-gray-100"
+         >
+           <h3 className="text-lg font-semibold">
+             {scaner.name || "Sin nombre"}
+           </h3>
+           <p className="text-sm">
+             Código de barras almacenado: {scaner.barcode || "N/A"}
+           </p>
+         </div>
+       ))}
+       </>
         )}
 
         {currentStep === 3 && (
