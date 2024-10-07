@@ -5,6 +5,7 @@ import Step1 from "./RechargeServicesSteps/Step1";
 import MobileServices from "../../components/MobileServices";
 import { phoneRecharge } from "../../../context/auth";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
+
 export default function RechargeServices() {
   const [currentStep, setCurrentStep] = useState(1); // Start at step 1
   const [selectedService, setSelectedService] = useState("recargas"); // Start with recharge selected
@@ -15,6 +16,8 @@ export default function RechargeServices() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isFirstLoad, setIsFirstLoad] = useState(true); // New state for controlling first load
   const [phoneNumber, setPhoneNumber] = useState(""); // State to store the phone number
+  const [barcodeNumber, setBarcodeNumber] = useState(""); // State to store barcode
+  const [selectedScaner, setSelectedScaner] = useState(null); // State to store selected scaner
 
   const handleStepChange = (step) => {
     setCurrentStep(step);
@@ -42,6 +45,16 @@ export default function RechargeServices() {
     } catch (error) {
       console.error("Error paying product:", error);
     }
+  };
+
+  const handleScanProduct = () => {
+    console.log("Escaneando producto...");
+  };
+
+  const handleScanSelect = (scaner) => {
+    console.log("Scan seleccionado:", scaner); // Para verificar si la función se está llamando
+    setSelectedScaner(scaner);
+    setCurrentStep(3); // Cambiar a paso 3
   };
 
   // Function to fetch services from the API
@@ -156,38 +169,80 @@ export default function RechargeServices() {
             </div>
           </>
         )}
+
         {currentStep === 2 && selectedService === "pagos" && (
-       <>
-       {scan.map((scaner)=>(
-           <div
-           key={scaner._id}
-           style={{ border: "1px solid red", padding: "10px" }} // Agrega estos estilos para ver los contenedores
-           className="bg-white p-4 rounded shadow cursor-pointer hover:bg-gray-100"
-         >
-           <h3 className="text-lg font-semibold">
-             {scaner.name || "Sin nombre"}
-           </h3>
-           <p className="text-sm">
-             Código de barras almacenado: {scaner.barcode || "N/A"}
-           </p>
-         </div>
-       ))}
-       </>
+          <>
+            {scan.map((scaner) => (
+              <div
+                key={scaner._id}
+                onClick={() => handleScanSelect(scaner)} // Al hacer clic selecciona el scaner
+                className="bg-white border border-gray-200 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+              >
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  {scaner.name || "Sin nombre"}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Código de barras:{" "}
+                  <span className="font-medium text-gray-700">
+                    {scaner.barcode || "N/A"}
+                  </span>
+                </p>
+              </div>
+            ))}
+          </>
         )}
 
-        {currentStep === 3 && (
+        {/* Formulario del código de barras solo se muestra en el paso 3 */}
+        {currentStep === 3 && selectedScaner && (
+        <div className="pb-[250px]">
+          <div className="flex flex-col items-center justify-center bg-white rounded-md shadow-lg py-4 px-10">
+            <h1 className="text-2xl font-normal m-5">
+              Escaneo del código de barras para{" "}
+              <span className="text-orange-500 font-semibold">
+                {selectedScaner.name || "Producto sin nombre"}
+              </span>
+            </h1>
+            <p className="text-3xl font-normal">
+              Código de barras: {selectedScaner.barcode || "N/A"}
+            </p>
+            <input
+              placeholder="000-000-0000"
+              type="tel"
+              className={`px-5 py-4 w-3/4 rounded-md shadow-md m-5 text-3xl focus:border-orange-400 ${barcodeNumber.length !== 18 && barcodeNumber.length > 0 ? 'border-red-500' : ''}`} // Estilo rojo si no tiene 18 caracteres
+              value={barcodeNumber}
+              onChange={(e) => setBarcodeNumber(e.target.value)} // Update the state on input change
+            />
+            {barcodeNumber.length !== 18 && barcodeNumber.length > 0 && (
+              <p className="text-red-500">El código de barras debe tener exactamente 18 caracteres.</p>
+            )}
+            <button
+              className="bg-orange-500 px-5 py-4 w-3/4 rounded-md shadow-md m-5 text-white"
+              onClick={handleScanProduct}
+              disabled={barcodeNumber.length !== 18} // Deshabilitar el botón si no tiene 18 caracteres
+            >
+              Escanear
+            </button>
+          </div>
+        </div>
+      )}
+
+
+        {currentStep === 3 && selectedProduct && (
           <div className="pb-[250px]">
-            <div className="flex flex-col items-center justify-center bg-white rounded-md shadow-lg py-4 px-10 ">
+            <div className="flex flex-col items-center justify-center bg-white rounded-md shadow-lg py-4 px-10">
               <h1 className="text-2xl font-normal m-5">
                 Ingresa el número para{" "}
                 <span className="text-orange-500 font-semibold">
-                  {selectedProduct?.ProductName}{" "}
+                  {selectedProduct?.ProductName || "Producto sin nombre"}{" "}
                 </span>
               </h1>
               <img
                 className="w-[50%] h-25 mx-auto"
-                src={selectedProduct?.ReferenceParameters.Reference1.URLImage}
-                alt={selectedProduct?.ProductName}
+                src={
+                  selectedProduct?.ReferenceParameters?.Reference1?.URLImage ||
+                  "https://via.placeholder.com/150"
+                }
+                alt={selectedProduct?.ProductName || "Producto sin nombre"}
               />
               <input
                 placeholder="000-000-0000"
@@ -197,7 +252,7 @@ export default function RechargeServices() {
                 onChange={(e) => setPhoneNumber(e.target.value)} // Update the state on input change
               />
               <p className="text-3xl font-normal">
-                {selectedProduct?.Amount} {selectedProduct?.CurrencyCode}
+                {selectedProduct.Amount} {selectedProduct.CurrencyCode}
               </p>
               <button
                 className="bg-orange-500 px-5 py-4 w-3/4 rounded-md shadow-md m-5 text-white"
@@ -208,10 +263,11 @@ export default function RechargeServices() {
             </div>
           </div>
         )}
+
         {currentStep === 4 && (
           <div>
             <h2>Resumen de la transacción para {selectedService}</h2>
-            {/* Here you can show the transaction summary */}
+            {/* Aquí puedes mostrar el resumen de la transacción */}
           </div>
         )}
       </main>
