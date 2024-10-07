@@ -4,6 +4,7 @@ import Logo from "../../../assets/images/logo.webp";
 import animationMap from "../../../assets/lotties/js/map.json";
 import animationSobre from '../../../assets/lotties/js/sobre.json'
 import animationCaja from '../../../assets/lotties/js/caja.json'
+import updateOrder from '../../../assets/lotties/js/updateOrder.json'
 import { useState, useEffect } from "react";
 import VirtualKeyboard from "../../../components/VirtualKeyboard.jsx/VirtualKerboard";
 import { useAuth } from "../../../../context/AuthContext";
@@ -132,7 +133,7 @@ export default function Step1({
             <h1 className="text-4xl font-semibold mx-8 text-center">
               Selecciona el tipo de <span className="text-orange-500">paquete</span>
             </h1>
-            <div className="flex flex-row gap-8">
+            <div className="flex flex-row gap-5 justify-center">
               <div
                 className="p-6 bg-white shadow-md rounded-md cursor-pointer hover:shadow-lg"
                 onClick={() => selectPackageType("Sobre")}
@@ -154,6 +155,25 @@ export default function Step1({
                 <h2 className="text-2xl text-center">Paquete</h2>
                 <Lottie
               animationData={animationCaja}
+              loop
+              autoplay
+              background="transparent"
+              speed={1}
+              style={{ width: 500, height: 500 }}
+            />
+              </div>
+              <div
+                className="p-6 bg-white shadow-md rounded-md cursor-pointer hover:shadow-lg flex flex-col items-center justify-center w-[30%]"
+                onClick={() => selectPackageType("Paquete")}
+              >
+             <div className="flex flex-col ">
+             <h2 className="text-2xl text-center">Actualiza tu orden</h2>
+                <p className="text-xl text-center ">
+                  Si cuentas con algun folio de un pedido con el pago pendiente puedes actualizar tu orden y pagar en la terminal.
+                </p>
+             </div>
+                <Lottie
+              animationData={updateOrder}
               loop
               autoplay
               background="transparent"

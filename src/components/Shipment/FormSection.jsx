@@ -156,7 +156,7 @@ export const FormSection = ({
               value={data.colony}
               onChange={(e) => onChange({ ...data, colony: e.target.value })}
               disabled={disabled}
-              onFocus={() => setActiveInput("colonia")}
+              onFocus={() => setActiveInput("colony")}
             />
             <InputField
               label="Calle"
@@ -283,14 +283,14 @@ export const SenderFormSection = ({
             <InputField
               label={"Nombre completo"}
               value={data.nameSender}
-              onChange={(e) => onChange({ ...data, name: e.target.value })} // Corregido para usar nameSender
+              onChange={(e) => onChange({ ...data, nameSender: e.target.value })} // Corregido para usar nameSender
               disabled={disabled}
               onFocus={() => setActiveInput("nameSender")} // Asegúrate de que el nombre coincida
             />
             <InputField
               label={"Correo Electrónico"}
               value={data.emailSender}
-              onChange={(e) => onChange({ ...data, email: e.target.value })} // Corregido para usar emailSender
+              onChange={(e) => onChange({ ...data, emailSender: e.target.value })} // Corregido para usar emailSender
               disabled={disabled}
               onFocus={() => setActiveInput("emailSender")} // Asegúrate de que el nombre coincida
             />
@@ -298,7 +298,7 @@ export const SenderFormSection = ({
           <InputField
             label={"Teléfono"}
             value={data.phoneSender}
-            onChange={(e) => onChange({ ...data, phone: e.target.value })} // Corregido para usar phoneSender
+            onChange={(e) => onChange({ ...data, phoneSender: e.target.value })} // Corregido para usar phoneSender
             disabled={disabled}
             onFocus={() => setActiveInput("phoneSender")} // Asegúrate de que el nombre coincida
           />

@@ -34,7 +34,7 @@ const inputFields = [
   { label: "Código Postal", key: "zipCode", type: "text", id: "1zipCode" },
   { label: "Estado", key: "state", type: "text", id: "5state" },
   { label: "Ciudad", key: "city", type: "text", id: "4city" },
-  { label: "Colonia", key: "colony", type: "text", id: "2colony" },
+  { label: "Colonia", key: "colony", type: "text", id: "colony" },
   { label: "Calle", key: "street", type: "text", id: "3street" },
   {
     label: "Número Exterior",
@@ -309,17 +309,8 @@ export default function Step3({
     <div className="p-6 overflow-hidden">
       {step5 && (
         <>
-          <ShipmentInfo data={shippingData} />
-         <div className="absolute left-[70%] top-[25%] bg-white p-5 text-center shadow-md rounded-lg">
-          <h1>
-            Presione para continuar para ir al metodo de pago
-          </h1>
-         <button
-            onClick={handleContinueStep}
-            className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-            Continuar 
-          </button>
-         </div>
+          <ShipmentInfo data={shippingData} handleClick={handleClick}/>
+     
         </>
       )}
       {step4 && (

@@ -141,7 +141,7 @@ export default function Shipment() {
           </div>
         ))}
       </header>
-      <main className="h-[44vw] w-[100vw] flex justify-center items-center bg-gray-100 overflow-hidden">
+      <main className="h-[50vw] w-[100vw] flex justify-center items-center bg-gray-50 overflow-hidden">
         <Link
           to="/"
           className="fixed top-16 left-4 z-40 w-1/6 mt-4 bg-gray-300 w-auto px-6 py-2 rounded-full cursor-pointer hover:bg-gray-400"

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import animationLoading from "../assets/icons/Cargando.svg";
+import { useState, useEffect, useRef } from "react";
+import animationLoading from "../assets/icons/loading.mp4";
 
 const NO_QUOTES_ERROR = "No se encontraron cotizaciones.";
 const LOADING_MESSAGE = "Cargando cotizaciones...";
@@ -10,6 +10,7 @@ export default function ShipmentServices({
   handleStep4,
   logoMap,
 }) {
+  const videoRef = useRef(null);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,6 +27,15 @@ export default function ShipmentServices({
       setLoading(true);
     }
   }, [quote]);
+
+
+  useEffect(() => {
+    if (loading && videoRef.current) {
+      videoRef.current.play().catch((error) => {
+        console.error("Error al reproducir video:", error);
+      });
+    }
+  }, [loading]);
 
   const handleSelectQuote = (service) => {
     setSelectedQuote(service);
@@ -58,14 +68,13 @@ export default function ShipmentServices({
             const logo = logoMap[service.proveedor] || "";
             services.push(
               <div
-              
                 key={service.idServicio}
                 className={`mb-4 p-4 border rounded-md shadow-lg cursor-pointer  
                   ${
-                  selectedQuote?.idServicio === service.idServicio
-                    ? "border-orange-400"
-                    : ""
-                }`}
+                    selectedQuote?.idServicio === service.idServicio
+                      ? "border-orange-400"
+                      : ""
+                  }`}
               >
                 <img
                   src={logo}
@@ -79,8 +88,8 @@ export default function ShipmentServices({
                 <p>Kilos a cobrar: {service.kilos_a_cobrar}</p>
                 <p>Zona: {service.zona}</p>
                 <p>
-                  
-                  Cobertura especial: {service.cobertura_especial === "FALSE" ? "No" : "Sí"}
+                  Cobertura especial:{" "}
+                  {service.cobertura_especial === "FALSE" ? "No" : "Sí"}
                 </p>
                 <button
                   onClick={() => handleSelectQuote(service)}
@@ -95,14 +104,25 @@ export default function ShipmentServices({
       }
     }
 
-    return services.length > 0 ? services : <p>No se encontraron servicios disponibles.</p>;
+    return services.length > 0 ? (
+      services
+    ) : (
+      <p>No se encontraron servicios disponibles.</p>
+    );
   };
 
   if (loading) {
     return (
       <div className="w-full h-full">
-        <img className="h-20 w-20 mx-auto" src={animationLoading} alt="Cargando" />
-        <h1 className="text-xl text-orange-500">{LOADING_MESSAGE}</h1>
+          <video
+            ref={videoRef}
+            src={animationLoading}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full"
+          />
       </div>
     );
   }
@@ -115,8 +135,10 @@ export default function ShipmentServices({
     <div className="p-4 bg-white rounded-md shadow-lg mt-10">
       <h1 className="text-xl font-bold mb-4">Información de cotización</h1>
       <div className="flex flex-wrap gap-2  items-center justify-center">
-      {renderServices()}</div>
-      {provedorPrincipal && <p>Proveedor Principal: {provedorPrincipal}</p>} {/* Mostrar el proveedor principal */}
+        {renderServices()}
+      </div>
+      {provedorPrincipal && <p>Proveedor Principal: {provedorPrincipal}</p>}{" "}
+      {/* Mostrar el proveedor principal */}
     </div>
   );
 }
