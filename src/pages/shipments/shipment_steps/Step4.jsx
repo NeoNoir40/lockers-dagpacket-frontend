@@ -4,12 +4,13 @@ import { useAuth } from "../../../../context/AuthContext";
 import axios from "axios";
 import Swal from "sweetalert2";
 import loading_animtation from "../../../assets/icons/loading.mp4";
-import animationPaymet from '../../../assets/lotties/js/payment_terminal.json'
+import animationPaymet from "../../../assets/lotties/js/payment_terminal.json";
 import Lottie from "lottie-react";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 export default function Step4({ handleClick, shippingData }) {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [folio, setFolio] = useState("");
   const videoRef = useRef(null);
 
   const locker_info = user.locker_info;
@@ -168,6 +169,43 @@ export default function Step4({ handleClick, shippingData }) {
   console.log("shipment", shipment);
   console.log("shippingData", shippingData);
 
+  const updateShipment = async () => {
+    setIsLoading(true);
+    const id_folio = localStorage.getItem("folio");
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        `${api}/shipments/update/${id_folio}`,
+        shipment,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success == false) {
+        Swal.fire({
+          icon: "error",
+          title: "Error al actualizar envío",
+          text: response.data.message,
+        });
+        return;
+      }
+      setFolio(id_folio);
+      Swal.fire({
+        icon: "success",
+        title: "Envío actualizado",
+        text: "El envío se ha actualizado correctamente",
+      });
+    } catch (error) {
+      console.error("Error al actualizar envío:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const generateShipment = async () => {
     setIsLoading(true);
 
@@ -193,13 +231,12 @@ export default function Step4({ handleClick, shippingData }) {
       }
 
       localStorage.setItem("shipment_id", response.data.shipment);
-      
+      setFolio(response.data.shipment);
       Swal.fire({
         icon: "success",
         title: "Envío creado",
         text: "El envío se ha creado correctamente",
       });
-
     } catch (error) {
       console.error("Error al crear envío:", error);
     } finally {
@@ -207,10 +244,14 @@ export default function Step4({ handleClick, shippingData }) {
     }
   };
 
-
   useEffect(() => {
+    const order = localStorage.getItem("update_order");
+
+    if (order === "true") {
+      updateShipment();
+    } else {
       generateShipment();
-    
+    }
   }, []);
 
   useEffect(() => {
@@ -231,63 +272,71 @@ export default function Step4({ handleClick, shippingData }) {
       });
       return;
     }
-  
-    navigator.clipboard.writeText(shipmentId).then(() => {
-      Swal.fire({
-        icon: "success",
-        title: "Folio copiado",
-        text: "El folio se ha copiado al portapapeles.",
+
+    navigator.clipboard
+      .writeText(shipmentId)
+      .then(() => {
+        Swal.fire({
+          icon: "success",
+          title: "Folio copiado",
+          text: "El folio se ha copiado al portapapeles.",
+        });
+      })
+      .catch((error) => {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo copiar el folio.",
+        });
+        console.error("Error al copiar folio:", error);
       });
-    }).catch((error) => {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "No se pudo copiar el folio.",
-      });
-      console.error("Error al copiar folio:", error);
-    });
   };
-  
+
+  const simulePayment = () => {
+    Swal.fire({
+      icon: "error",
+      title: "Pago no realizado",
+      text: "Ocurrio un error al intentar procesar el pago.",
+    });
+  }
+
   return (
     <div>
-    {isLoading ? (
-      <>
-        <video
-          ref={videoRef}
-          src={loading_animtation}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full"
-        />
-      </>
-    ) : (
-      <div className="flex flex-col items-center justify-center h-full w-full p-6 bg-gray-100 rounded-lg shadow-lg">
-       <p className="text-lg font-semibold text-orange-600 mb-4">
-  El folio de tu envío es:{" "}
-  <strong
-    className="text-orange-600 cursor-pointer hover:underline"
-    onClick={copyToClipboard}
-  >
-    {localStorage.getItem("shipment_id")}
-  </strong>
-</p>
+      {isLoading ? (
+        <>
+          <video
+            ref={videoRef}
+            src={loading_animtation}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full"
+          />
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full w-full p-6 bg-gray-100 rounded-lg shadow-lg">
+          <p className="text-lg font-semibold text-orange-600 mb-4">
+            El folio de tu envío es: {folio}
+            <strong
+              className="text-orange-600 cursor-pointer hover:underline"
+              onClick={copyToClipboard}
+            ></strong>
+          </p>
 
-        <Lottie animationData={animationPaymet} style={{ width: "300px" }} />
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Por favor realiza tu pago en la terminal, <br /> una vez realizado, tu
-          envío estará listo para ser depositado en la gaveta.
-        </h1>
-        <button
-          onClick={handleClick}
-          className="px-6 py-3 bg-orange-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition duration-300 ease-in-out shadow-md"
-        >
-          Realizar Pago
-        </button>
-      </div>
-    )}
-  </div>
-  
+          <Lottie animationData={animationPaymet} style={{ width: "300px" }} />
+          <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Por favor realiza tu pago en la terminal, <br /> una vez realizado,
+            tu envío estará listo para ser depositado en la gaveta.
+          </h1>
+          <button
+            onClick={simulePayment}
+            className="px-6 py-3 bg-orange-500 text-white text-lg font-semibold rounded-lg hover:bg-orange-700 transition duration-300 ease-in-out shadow-md"
+          >
+            Realizar Pago
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

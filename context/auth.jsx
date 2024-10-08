@@ -240,3 +240,22 @@ if(response.data.result.PinDistSaleResponse.ResponseCode == '51'){
   }
   // console.log(data);
 }
+
+
+export const getShipmentInfo = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.get(
+      `${api}/shipments/details/${id}`, // Usar la URL del .env
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (e) {
+    console.log(e);
+    throw e;
+  }
+}

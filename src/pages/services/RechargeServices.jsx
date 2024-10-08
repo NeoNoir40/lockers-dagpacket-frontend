@@ -206,7 +206,7 @@ export default function RechargeServices() {
               Código de barras: {selectedScaner.barcode || "N/A"}
             </p>
             <input
-              placeholder="000-000-0000"
+              placeholder="000-000-0000-000-00000"
               type="tel"
               className={`px-5 py-4 w-3/4 rounded-md shadow-md m-5 text-3xl focus:border-orange-400 ${barcodeNumber.length !== 18 && barcodeNumber.length > 0 ? 'border-red-500' : ''}`} // Estilo rojo si no tiene 18 caracteres
               value={barcodeNumber}

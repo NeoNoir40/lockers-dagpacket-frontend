@@ -25,7 +25,11 @@ export default function Shipment() {
     company: null,
   });
 
- 
+  const deleteLocalStorage = () => {
+    localStorage.removeItem("orden");
+    localStorage.removeItem("update_order");
+    localStorage.removeItem("folio");
+  };
 
   const { user } = useAuth();
   console.log(shippingData);
@@ -62,7 +66,7 @@ export default function Shipment() {
       ...prev,
       package: {
         ...prev.package,
-        package: '',
+        package: "",
         type: value,
         height: value === "Sobre" ? 10 : prev.package.height, // Asignar 10 si es "sobre"
         width: value === "Sobre" ? 10 : prev.package.width, // Asignar 10 si es "sobre"
@@ -93,7 +97,6 @@ export default function Shipment() {
       package: data,
     }));
   };
-  
 
   const handleCompanySelection = (company) => {
     setShippingData((prev) => ({
@@ -103,7 +106,6 @@ export default function Shipment() {
   };
 
   useEffect(() => {
-
     // getGabetas();
 
     if (user) {
@@ -126,7 +128,8 @@ export default function Shipment() {
               currentStep === step
                 ? `bg-orange-500`
                 : `bg-gray-${100 + step * 100}`
-            }`}>
+            }`}
+          >
             <h1 className="text-xl">{`${step}. ${
               step === 1
                 ? "CP de Destino"
@@ -145,7 +148,9 @@ export default function Shipment() {
         <Link
           to="/"
           className="fixed top-16 left-4 z-40 w-1/6 mt-4 bg-gray-300 w-auto px-6 py-2 rounded-full cursor-pointer hover:bg-gray-400"
-          type="button">
+          onClick={deleteLocalStorage}
+          type="button"
+        >
           Cancelar
         </Link>
         {currentStep === 1 && (

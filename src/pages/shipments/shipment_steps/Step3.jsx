@@ -6,8 +6,8 @@ import PaqueteExLogo from "../../../assets/images/logos/Paquetexpress Logo Vecto
 import axios from "axios";
 import ShipmentServices from "../../../components/ShipmentServices";
 import ShipmentInfo from "../../../components/ShipmentInfo";
+import UpdateShipmentInfo from "../../../components/updateShipmentInfo";
 import Swal from "sweetalert2";
-
 import {
   FormSection,
   InputField,
@@ -83,7 +83,7 @@ export default function Step3({
   const [step3, setStep3] = useState(false);
   const [step4, setStep4] = useState(false);
   const [step5, setStep5] = useState(false);
-  //
+
   const cp = localStorage.getItem("zipCode");
   const [isConfirmedPackage, setIsConfirmedPackage] = useState(false);
   const [goToDetails, setGoToDetails] = useState(false);
@@ -92,20 +92,36 @@ export default function Step3({
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [activeFormSender, setActiveFormSender] = useState(true);
   const [activeFormRecipient, setActiveFormRecipient] = useState(false);
+  const order = localStorage.getItem("update_order");
 
-  const [quote, setQuote] = useState(null);
+  const [update_order, setUpdateOrder] = useState(false);
   const [data, setData] = useState({
     pais_origen: "MX",
     pais_destino: "MX",
-    cp_origen: "", // Inicialmente vacío, se actualizará con los datos del paquete
-    cp_destino: "", // Se actualizará con el código postal del destinatario
+    cp_origen: cp, // Inicialmente vacío, se actualizará con los datos del paquete
+    cp_destino:
+      localStorage.getItem("zipCodeReceiver") || shippingData.recipient.zipCode, // Se actualizará con el código postal del destinatario
     alto: 10,
     ancho: 10,
     largo: 10,
     peso: 2,
-    seguro: false,
+    seguro: shippingData.package.insurance || false,
     valor_declarado: 250,
   });
+  useEffect(() => {
+    console.log("Order:", order);
+    if (order) {
+      setUpdateOrder(true);
+      setStep1(false);
+      setStep3(true);
+      fetchQuote(data);
+      console.log("Datos enviados:", data);
+    }else{
+      setUpdateOrder(false);
+
+    }
+  }, []);
+  const [quote, setQuote] = useState(null);
 
   useEffect(() => {
     if (destinationCP) {
@@ -119,7 +135,10 @@ export default function Step3({
   // Para mostrar los datos del paquete en el formulario de confirmación
 
   const handleContinue = () => {
-    if(shippingData.package.description === "" || !shippingData.package.description){
+    if (
+      shippingData.package.description === "" ||
+      !shippingData.package.description
+    ) {
       Swal.fire({
         title: "Error",
         text: "Por favor, ingrese una descripción del paquete",
@@ -139,7 +158,9 @@ export default function Step3({
       pais_origen: "MX",
       pais_destino: "MX",
       cp_origen: cp,
-      cp_destino: shippingData.recipient.zipCode,
+      cp_destino:
+        localStorage.getItem("zipCodeReceiver") ||
+        shippingData.recipient.zipCode,
       alto: 10,
       ancho: 10,
       largo: 10,
@@ -196,7 +217,7 @@ export default function Step3({
 
   const handleFormSender = () => {
     const errors = []; // Array para almacenar los campos que no se llenaron
-  
+
     // Comprobar cada campo del remitente
     if (!shippingData.sender.nameSender) {
       errors.push("Nombre del Remitente");
@@ -207,7 +228,7 @@ export default function Step3({
     if (!shippingData.sender.emailSender) {
       errors.push("Email del Remitente");
     }
-  
+
     // Si hay errores, mostrar un mensaje de error
     if (errors.length > 0) {
       Swal.fire({
@@ -218,15 +239,14 @@ export default function Step3({
       });
       return;
     }
-  
+
     setActiveFormSender(false);
     setActiveFormRecipient(true);
   };
-  
 
   const handleFormRecipient = () => {
     const errors = []; // Array para almacenar los campos que no se llenaron
-  
+
     // Validar cada campo y agregar el mensaje correspondiente al array de errores
     if (!shippingData.recipient.name) {
       errors.push("Nombre");
@@ -236,13 +256,15 @@ export default function Step3({
     } else if (!/^[0-9]{10}$/.test(shippingData.recipient.phone)) {
       errors.push("Teléfono debe tener 10 dígitos.");
     }
-    
+
     if (!shippingData.recipient.email) {
       errors.push("Correo electrónico");
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shippingData.recipient.email)) {
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shippingData.recipient.email)
+    ) {
       errors.push("Correo electrónico no tiene un formato válido.");
     }
-  
+
     if (!shippingData.recipient.country) {
       errors.push("País");
     }
@@ -251,7 +273,7 @@ export default function Step3({
     } else if (!/^[0-9]{5}$/.test(shippingData.recipient.zipCode)) {
       errors.push("Código postal debe tener 5 dígitos.");
     }
-    
+
     if (!shippingData.recipient.state) {
       errors.push("Estado");
     }
@@ -270,7 +292,7 @@ export default function Step3({
     if (!shippingData.recipient.address) {
       errors.push("Dirección");
     }
-  
+
     // Si hay errores, muestra el mensaje de error
     if (errors.length > 0) {
       Swal.fire({
@@ -281,10 +303,9 @@ export default function Step3({
       });
       return;
     }
-  
+
     setActiveFormRecipient(false);
   };
-  
 
   const handleEditFormRecipient = () => {
     setActiveFormRecipient(true);
@@ -309,83 +330,102 @@ export default function Step3({
     <div className="p-6 overflow-hidden">
       {step5 && (
         <>
-          <ShipmentInfo data={shippingData} handleClick={handleClick}/>
-     
+          <ShipmentInfo data={shippingData} handleClick={handleClick} />
         </>
       )}
-      {step4 && (
-        <>
-          <div className="grid grid-cols-2 gap-10">
-            <SenderFormSection
-              title="Datos del Remitente"
-              inputFields={inputFieldsSender}
-              data={shippingData.sender}
-              onChange={handleSenderDataChange}
-              disabled={false} // Habilitar inputs
-              active={activeFormSender}
-              activeRecipient={activeFormRecipient}
+      
+      {shippingData.company != null && update_order !== false && (
+  <>
+    <UpdateShipmentInfo
+      handleClick={handleClick}
+      shipment_info={shippingData}
+      handleSenderDataChange={handleSenderDataChange}
+      handleRecipientDataChange={handleRecipientDataChange}
+    />
+  </>
+)}
+   
+{update_order ? (
+  <>
+  </>
 
-              
-            />
-            <FormSection
-              title="Datos del Destinatario"
-              inputFields={inputFields}
-              data={shippingData.recipient}
-              onChange={handleRecipientDataChange}
-              disabled={false} // Habilitar inputs
-              activeRecipient={activeFormRecipient}
-            />
-            {/* <button
-              onClick={handleStep5}
-              className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-              Continuar 4
-            </button> */}
-            {activeFormSender ? (
-              <button
-                onClick={handleFormSender}
-                className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-                Continuar 
-              </button>
-            ) : (
-              <button
-                onClick={editFormSender}
-                className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-                Editar
-              </button>
-            )}
-            {activeFormRecipient && (
-              <button
-                onClick={handleFormRecipient}
-                className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-                Continuar
-              </button>
-            )}
-
-            {!activeFormRecipient && !activeFormSender && (
-              <button
-                onClick={handleEditFormRecipient}
-                className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
-                Editar
-              </button>
-            )}
-
-            {!activeFormRecipient && !activeFormSender ? (
-             <div className=" absolute  left-[77%] text-center text-md bg-white p-5 shadow-md rounded-xl">
-              <h2>
-                Presione para continuar a la siguiente pantalla
-                </h2>
-                <button
-                  onClick={handleStep5}
-                  className="bg-orange-500  text-white text-xl font-semibold px-6 py-3 rounded-lg ">
-                  Continuar
-                </button>
-             </div>
-            ) : (
-              <></>
-            )}
-          </div>
-        </>
+):(<>
+{step4 && (
+  <>
+    <div className="grid grid-cols-2 gap-10">
+      <SenderFormSection
+        title="Datos del Remitente"
+        inputFields={inputFieldsSender}
+        data={shippingData.sender}
+        onChange={handleSenderDataChange}
+        disabled={false} // Habilitar inputs
+        active={activeFormSender}
+        activeRecipient={activeFormRecipient}
+      />
+      <FormSection
+        title="Datos del Destinatario"
+        inputFields={inputFields}
+        data={shippingData.recipient}
+        onChange={handleRecipientDataChange}
+        disabled={false} // Habilitar inputs
+        activeRecipient={activeFormRecipient}
+      />
+      {/* <button
+        onClick={handleStep5}
+        className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
+        Continuar 4
+      </button> */}
+      {activeFormSender ? (
+        <button
+          onClick={handleFormSender}
+          className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
+        >
+          Continuar
+        </button>
+      ) : (
+        <button
+          onClick={editFormSender}
+          className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
+        >
+          Editar
+        </button>
       )}
+      {activeFormRecipient && (
+        <button
+          onClick={handleFormRecipient}
+          className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
+        >
+          Continuar
+        </button>
+      )}
+
+      {!activeFormRecipient && !activeFormSender && (
+        <button
+          onClick={handleEditFormRecipient}
+          className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
+        >
+          Editar
+        </button>
+      )}
+
+      {!activeFormRecipient && !activeFormSender ? (
+        <div className=" absolute  left-[77%] text-center text-md bg-white p-5 shadow-md rounded-xl">
+          <h2>Presione para continuar a la siguiente pantalla</h2>
+          <button
+            onClick={handleStep5}
+            className="bg-orange-500  text-white text-xl font-semibold px-6 py-3 rounded-lg "
+          >
+            Continuar
+          </button>
+        </div>
+      ) : (
+        <></>
+      )}
+    </div>
+  </>
+)}
+</>)}
+      
       {step3 && (
         <>
           <ShipmentServices
@@ -396,6 +436,7 @@ export default function Step3({
           />
         </>
       )}
+
       {showConfirmation && (
         <div>
           <h1 className="text-3xl font-semibold mb-6">Confirmar Datos</h1>
@@ -410,17 +451,20 @@ export default function Step3({
           <div className="flex gap-4 mt-6">
             <button
               onClick={handleConfirm}
-              className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-full">
+              className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-full"
+            >
               Confirmar
             </button>
             <button
               onClick={handleEdit}
-              className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-full">
+              className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-full"
+            >
               Editar
             </button>
           </div>
         </div>
       )}
+
       {step1 && (
         <div>
           <div className="flex gap-8">
@@ -435,7 +479,8 @@ export default function Step3({
 
           <button
             onClick={handleContinue}
-            className="bg-orange-500 text-white text-xl font-semibold px-6 py-3  mt-6 rounded-full">
+            className="bg-orange-500 text-white text-xl font-semibold px-6 py-3  mt-6 rounded-full"
+          >
             Continuar
           </button>
         </div>

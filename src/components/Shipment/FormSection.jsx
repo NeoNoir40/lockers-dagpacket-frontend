@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import VirtualKeyboard from "./VirtualKeyboard.jsx"; // Asegúrate de importar correctamente
+import VirtualKeyboardFull from "./VirtualKeyboard.jsx"; // Asegúrate de importar correctamente
 
 export const FormSection = ({
   title,
@@ -210,7 +210,7 @@ export const FormSection = ({
             activeRecipient ? "" : "hidden"
           }`}
           ref={keyboardRef}>
-          <VirtualKeyboard
+          <VirtualKeyboardFull
             className=""
             onKeyPress={handleKeyPress} // Cambiar valor del input
             activeInput={activeInput}
@@ -310,7 +310,7 @@ export const SenderFormSection = ({
             active ? "" : "hidden"
           } top-[40%] right-[50%] `}
           ref={keyboardRef}>
-          <VirtualKeyboard
+          <VirtualKeyboardFull
             onKeyPress={handleKeyPress} // Cambiar valor del input
             activeInput={activeInput}
             setActiveInput={setActiveInput}
@@ -368,7 +368,7 @@ export const PackageFormSection = ({ title, data, onChange, disabled }) => {
           activeInput ? "" : "hidden"
         }`}
         ref={keyboardRef}>
-        <VirtualKeyboard
+        <VirtualKeyboardFull
           onKeyPress={handleKeyPress}
           activeInput={activeInput}
           setActiveInput={setActiveInput}
