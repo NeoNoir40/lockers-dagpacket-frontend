@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DhlLogo from "../../../assets/images/logos/dhl-logo.svg";
 import FedexLogo from "../../../assets/images/logos/fedex-logo.svg";
 import EstafetaLogo from "../../../assets/images/logos/estafeta-logo-png-transparent.png";
@@ -16,7 +17,6 @@ import {
 } from "../../../components/Shipment/FormSection";
 import { useAuth } from "../../../../context/AuthContext";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
-
 const logoMap = {
   Fedex: FedexLogo,
   Superenvios: "",
@@ -77,7 +77,7 @@ export default function Step3({
   handlePackageDataChange,
 }) {
   //Nuevos estados para el flujo de la cotización
-  const { getGabetas } = useAuth();
+  const { getGabetas ,gavetaAvailable} = useAuth();
   const [step1, setStep1] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [step3, setStep3] = useState(false);
@@ -121,6 +121,44 @@ export default function Step3({
 
     }
   }, []);
+
+    const navigate = useNavigate(); // Inicializa useNavigate
+  
+    useEffect(() => {
+      if (gavetaAvailable === null || gavetaAvailable === false) {
+        const title = gavetaAvailable === null ? "Gaveta no asignada" : "Sin Gavetas Disponibles por el momento";
+        
+        let timerInterval;
+  
+        Swal.fire({
+          icon: "error",
+          title: title,
+          html: "Se cerrara en <b></b>. milisegundos.",
+          timer: 3000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        allowOutsideClick: false, // Deshabilita el clic fuera del modal
+        allowEscapeKey: false, // Deshabilita la tecla ESC
+          didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+              timer.textContent = `${Swal.getTimerLeft()}`; // Actualiza el tiempo restante
+            }, 100);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          }
+        }).then((result) => {
+          if (result.dismiss === Swal.DismissReason.timer) {
+            console.log("I was closed by the timer");
+            navigate('/'); // Redirige a la ruta principal
+
+          }
+        });
+      }
+    }, []); 
+
   const [quote, setQuote] = useState(null);
 
   useEffect(() => {

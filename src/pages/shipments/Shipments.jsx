@@ -25,6 +25,9 @@ export default function Shipment() {
     company: null,
   });
 
+
+
+
   const deleteLocalStorage = () => {
     localStorage.removeItem("orden");
     localStorage.removeItem("update_order");

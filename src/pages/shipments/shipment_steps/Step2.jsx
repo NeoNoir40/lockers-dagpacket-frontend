@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
-
+import { useAuth } from "../../../../context/AuthContext";
 import "../../../assets/css/shipment/shipment.css";
 
 const Step2 = ({ handleClick, onWeightChange }) => {
@@ -14,6 +15,46 @@ const scale = localStorage.getItem("Pesa");
   const handleContinue = () => {
     handleClick(3);
   };
+
+  const { gavetaAvailable } = useAuth();
+
+  const navigate = useNavigate(); // Inicializa useNavigate
+  
+  useEffect(() => {
+    if (gavetaAvailable === null || gavetaAvailable === false) {
+      const title = gavetaAvailable === null ? "Gaveta no asignada" : "Sin Gavetas Disponibles por el momento";
+      
+      let timerInterval;
+
+      Swal.fire({
+        icon: "error",
+        title: title,
+        html: "Se cerrara en <b></b>. milisegundos.",
+        timer: 4000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowOutsideClick: false, // Deshabilita el clic fuera del modal
+        allowEscapeKey: false, // Deshabilita la tecla ESC
+        didOpen: () => {
+          Swal.showLoading();
+          const timer = Swal.getPopup().querySelector("b");
+          timerInterval = setInterval(() => {
+            timer.textContent = `${Swal.getTimerLeft()}`; // Actualiza el tiempo restante
+          }, 100);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        }
+      }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+          console.log("I was closed by the timer");
+          navigate('/'); // Redirige a la ruta principal
+
+        }
+      });
+    }
+  }, []); 
+
 
   
 

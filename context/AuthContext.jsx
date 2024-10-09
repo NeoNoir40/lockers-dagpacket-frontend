@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
   const [gabetas, setGabetas] = useState([]);
   const [locker_id, setLockerId] = useState(null);
   const id_locker = localStorage.getItem("id_locker");
+  const [gavetaAvailable, setGavetaAvailable] = useState(null);
   const loginRequest = async (data) => {
     try {
       const response = await loginLocker(data);
@@ -113,16 +114,7 @@ export const AuthProvider = ({ children }) => {
         );
   
         if (todasGabetasInvalidas) {
-          Swal.fire({
-            title: "Error",
-            text: "No hay gabetas disponibles",
-            icon: "error",
-            confirmButtonText: "Aceptar",
-          }).then((result) => {
-            if (result.isConfirmed) {
-              window.location.href = "/";
-            }
-          });
+          setGavetaAvailable(false);
           console.log("No hay gabetas disponibles");
         } else {
           // Si hay al menos una gabeta válida (que no sea "Pesa" ni "Impresora")
@@ -223,6 +215,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated,
         user,
         gabetas,
+        gavetaAvailable,
       }}
     >
       {children}

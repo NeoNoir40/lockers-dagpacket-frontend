@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import animationLoading from "../assets/icons/loading.mp4";
-
+import { useNavigate } from "react-router-dom";
 const NO_QUOTES_ERROR = "No se encontraron cotizaciones.";
 const LOADING_MESSAGE = "Cargando cotizaciones...";
 
@@ -10,6 +10,46 @@ export default function ShipmentServices({
   handleStep4,
   logoMap,
 }) {
+
+
+  const navigate = useNavigate(); // Inicializa useNavigate
+  
+  useEffect(() => {
+    if (gavetaAvailable === null || gavetaAvailable === false) {
+      const title = gavetaAvailable === null ? "Gaveta no asignada" : "Sin Gavetas Disponibles por el momento";
+      
+      let timerInterval;
+
+      Swal.fire({
+        icon: "error",
+        title: title,
+        html: "Se cerrara en <b></b>. milisegundos.",
+        timer: 4000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        allowOutsideClick: false, // Deshabilita el clic fuera del modal
+        allowEscapeKey: false, // Deshabilita la tecla ESC
+        didOpen: () => {
+          Swal.showLoading();
+          const timer = Swal.getPopup().querySelector("b");
+          timerInterval = setInterval(() => {
+            timer.textContent = `${Swal.getTimerLeft()}`; // Actualiza el tiempo restante
+          }, 100);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        }
+      }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+          console.log("I was closed by the timer");
+          navigate('/'); // Redirige a la ruta principal
+
+        }
+      });
+    }
+  }, []); 
+
+
   const videoRef = useRef(null);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [loading, setLoading] = useState(true);
