@@ -303,7 +303,7 @@ export default function Step1({
               value={folioInput}
               onChange={(e) => setFolioInput(e.target.value)}
               onFocus={() => setActiveInput("folio")}
-              className="w-full px-[100px] py-3 border border-gray-300 rounded mb-4 text-2xl text-center"
+              className="w-full  py-3 border border-gray-300 rounded mb-4 text-2xl text-center"
               placeholder="Folio de la orden"
               readOnly
             />
