@@ -47,9 +47,34 @@ export default function RechargeServices() {
     }
   };
 
-  const handleScanProduct = () => {
-    console.log("Escaneando producto...");
+  const handleScanProduct = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const body = {
+        name: selectedScaner.name, // Enviar el nombre del scaner seleccionado
+        barcode: barcodeNumber,    // Enviar el código de barras ingresado
+      };
+  
+      console.log('Datos enviados:', body); // Para ver los datos que se están enviando
+  
+      const response = await axios.post(`${api}/scans`, body, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Agregar el token de autenticación
+        },
+      });
+  
+      if (response.status === 201) {
+        console.log("Código de barras guardado exitosamente:", response.data);
+        alert("Código de barras guardado exitosamente");
+        setBarcodeNumber(""); // Limpiar el campo después de guardar
+      } else {
+        console.error("Error al guardar el código de barras:", response.data);
+      }
+    } catch (error) {
+      console.error("Error al guardar el código de barras:", error);
+    }
   };
+  
 
   const handleScanSelect = (scaner) => {
     console.log("Scan seleccionado:", scaner); // Para verificar si la función se está llamando
@@ -171,25 +196,26 @@ export default function RechargeServices() {
         )}
 
         {currentStep === 2 && selectedService === "pagos" && (
-          <>
-            {scan.map((scaner) => (
-              <div
-                key={scaner._id}
-                onClick={() => handleScanSelect(scaner)} // Al hacer clic selecciona el scaner
-                className="bg-white border border-gray-200 rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-              >
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  {scaner.name || "Sin nombre"}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Código de barras:{" "}
-                  <span className="font-medium text-gray-700">
-                    {scaner.barcode || "N/A"}
-                  </span>
-                </p>
-              </div>
-            ))}
-          </>
+          <div className="grid grid-cols-2 gap-6">
+          {scan.map((scaner) => (
+            <div
+              key={scaner._id}
+              onClick={() => handleScanSelect(scaner)} // Al hacer clic selecciona el scaner
+              className="bg-white border border-black rounded-lg p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+            >
+              <h3 className="text-xl font-bold text-gray-800 mb-4">
+                {scaner.name || "Sin nombre"}
+              </h3>
+              <p className="text-lg text-gray-600">
+                Código de barras:{" "}
+                <span className="font-semibold text-gray-700">
+                  {scaner.barcode || "N/A"}
+                </span>
+              </p>
+            </div>
+          ))}
+        </div>
+        
         )}
 
         {/* Formulario del código de barras solo se muestra en el paso 3 */}
