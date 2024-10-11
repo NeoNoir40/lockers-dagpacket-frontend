@@ -1,21 +1,113 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useRef } from "react";
 import Lottie from "lottie-react";
 import animtationQr from "../../assets/lotties/js/qrscan.json";
 import animationLocker from "../../assets/lotties/js/locker.json";
-import { recolectGabeta } from "../../../context/auth";
+import { recolectGabeta,logGaveta } from "../../../context/auth";
+import axios from 'axios'
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2"; // Importa SweetAlert
 import { Link } from "react-router-dom";
 import "../../assets/css/shipment/shipment.css";
+const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
+const locker_id = localStorage.getItem("locker_id");
+const gabeta_id = localStorage.getItem("idGabeta");
+const TOKEN = localStorage.getItem("token");
+const id_locker = localStorage.getItem("id_locker");
+const userAgent = localStorage.getItem("userAgent");
 
 export default function Recolect() {
   const [currentStep, setCurrentStep] = useState(1);
   const [gaveta, setGaveta] = useState([]);
+  const inputRef = useRef(null);
 
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
 
+
+  const handleLogGaveta = async (action) => {
+    const logData = {
+      gabeta_id: gabeta_id,
+      locker_id: id_locker,
+      action: action,
+      device: userAgent , // Solo añade delivery si existe
+    };
+  
+    try {
+      const logResponse = await logGaveta(logData);
+      if (logResponse.success) {
+        console.log(logData);
+        Swal.fire({
+          title: "Registro Exitoso",
+          text: "La acción de la gaveta se ha registrado correctamente.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+      } else {
+        console.error("Data:", logData);
+
+        Swal.fire({
+          title: "Error",
+          text: "No se pudo registrar la acción de la gaveta.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error registrando la acción de la gaveta:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Ocurrió un error al registrar la acción de la gaveta.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+
+  const handleOpenDoor = async () => {
+    try {
+      // const openDoorResponse = await axios.post(
+      //   `${api}/mqtt/`,
+      //   {
+      //     locker_id: locker_id,
+      //     action: "sendLocker",
+      //     gabeta: gaveta.id_gabeta,
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${TOKEN}`,
+      //     },
+      //   }
+      // );
+
+      // if (!openDoorResponse.data.error) {
+      //   Swal.fire({
+      //     title: "Locker Abierto",
+      //     text: `El locker se ha abierto correctamente.`,
+      //     icon: "success",
+      //     confirmButtonText: "OK",
+      //   });
+        // Llama a la función de log al abrir la gaveta
+        await handleLogGaveta("Recibir paquete");
+      // } else {
+      //   Swal.fire({
+      //     title: "Error",
+      //     text: `No se pudo abrir el Locker.`,
+      //     icon: "error",
+      //     confirmButtonText: "OK",
+      //   });
+      // }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        title: "Error",
+        text: `No se pudo abrir el Locker.`,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  };
+  
   const onSubmit = async (data) => {
     try {
       const response = await recolectGabeta(data);
@@ -35,24 +127,39 @@ export default function Recolect() {
       console.log(e);
     }
   };
+  useEffect(() => {
+    if (currentStep === 1 && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [currentStep]);
+
+useEffect(() => {
+  const focusInput = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  // Enfocar el input inicialmente
+  focusInput();
+
+  // Agregar event listener para enfocar el input cuando la ventana gane el foco
+  window.addEventListener('focus', focusInput);
+
+  // Limpiar el event listener cuando el componente se desmonte
+  return () => {
+    window.removeEventListener('focus', focusInput);
+  };
+}, []);
 
   // Effect to show notification after 5 seconds in step 2
   useEffect(() => {
     if (currentStep === 2) {
-      const timer = setTimeout(() => {
-        Swal.fire({
-          title: "¡Paquete listo para ser recogido!",
-          text: "Puedes recoger tu paquete en la gabeta indicada.",
-          icon: "success",
-          confirmButtonText: "Aceptar",
-        });
-      }, 5000); // 5 segundos
-
-      return () => clearTimeout(timer); // Limpiar el timeout al desmontar
+     handleOpenDoor()
     }
   }, [currentStep]);
 
-  console.log(gaveta);
+  // console.log(gaveta.id_gabeta);
 
   return (
     <body className="overflow-hidden">
@@ -96,12 +203,16 @@ export default function Recolect() {
               Escanea tu <span className="text-orange-500">Código QR</span>
             </h1>
             <form onSubmit={handleSubmit(onSubmit)}>
-              <input
-                className="text-3xl w-full p-4 rounded-lg border-2 border-orange-400 mt-2"
-                type="text"
-                placeholder="Ingresa tu código de pedido"
-                {...register("pin")}
-              />
+            <input
+  className="  position-absolute"
+  type="text"
+  {...register("pin")}
+  ref={(e) => {
+    register("pin").ref(e);
+    inputRef.current = e;
+  }}
+  // style={{ position: 'absolute', left: '-9999px' }}
+/>
             </form>
           </div>
         )}

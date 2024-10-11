@@ -308,7 +308,7 @@ export const SenderFormSection = ({
         <div
           className={`absolute ${
             active ? "" : "hidden"
-          } top-[40%] right-[50%] `}
+          } top-[45%] right-[50%] `}
           ref={keyboardRef}>
           <VirtualKeyboardFull
             onKeyPress={handleKeyPress} // Cambiar valor del input
@@ -364,7 +364,7 @@ export const PackageFormSection = ({ title, data, onChange, disabled }) => {
 
       {/* Teclado virtual siempre visible */}
       <div
-        className={`absolute top-[40%] left-[65%] ${
+        className={`absolute top-[110%]  ${
           activeInput ? "" : "hidden"
         }`}
         ref={keyboardRef}>

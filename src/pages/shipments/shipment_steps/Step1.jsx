@@ -293,8 +293,8 @@ export default function Step1({
         </>
       )}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white px-10 py-5 rounded-lg shadow-xl max-w-xl w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
+          <div className="bg-white px-10 py-5 rounded-lg shadow-xl max-w-xl w-full mb-[80px]">
             <h2 className="text-2xl font-bold mb-4 text-center">
               Ingresa el folio de tu orden
             </h2>

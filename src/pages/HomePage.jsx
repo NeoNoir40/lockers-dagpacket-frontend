@@ -24,6 +24,11 @@ const HomePage = () => {
     window.navigator.userAgent;
   };
 
+  useEffect(() => {
+    localStorage.setItem("userAgent", window.navigator.userAgent);
+  }
+  , []);
+
 
 
 

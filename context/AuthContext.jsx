@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }) => {
   
         // Verifica si todas las gabetas son de tipo "Pesa" o "Impresora"
         const todasGabetasInvalidas = response.message.every(
-          (gabeta) => gabeta.type === "Pesa" || gabeta.type === "Impresora"
+          (gabeta) => gabeta.type === "Pesa"
         );
   
         if (todasGabetasInvalidas) {
@@ -120,23 +120,11 @@ export const AuthProvider = ({ children }) => {
           // Si hay al menos una gabeta válida (que no sea "Pesa" ni "Impresora")
           const idGabeta = response.message[0].id_gabeta;
           const _idgabeta = response.message[0]._id;
-  
+          setGavetaAvailable(true);
           localStorage.setItem("_idgabeta", _idgabeta);
           localStorage.setItem("idGabeta", idGabeta);
         }
-      } else {
-        Swal.fire({
-          title: "Error",
-          text: "No hay gabetas disponibles",
-          icon: "error",
-          confirmButtonText: "Aceptar",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = "/";
-          }
-        });
-        console.log("No hay gabetas disponibles");
-      }
+      } 
     } catch (e) {
       console.log(e);
     }

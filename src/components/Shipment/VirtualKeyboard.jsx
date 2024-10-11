@@ -7,8 +7,6 @@ const VirtualKeyboardFull = ({ onKeyPress }) => {
   const handleKeyPress = (key) => {
     if (key === "←") {
       onKeyPress(""); // Enviar una cadena vacía para indicar un retroceso
-    } else if (key === "Enter") {
-      onKeyPress("Enter");
     } else if (key === "Espacio") {
       onKeyPress(" ");
     } else if (key === "Mayus") {
@@ -25,11 +23,12 @@ const VirtualKeyboardFull = ({ onKeyPress }) => {
         <button
           key={key}
           onClick={() => handleKeyPress(key)}
-          className={`border rounded-md h-10 min-w-10 p-2 m-1 ${
+          className={`border rounded-md min-h-[50px] min-w-[60px] p-2 m-1 m-1 ${
             key === "Espacio" || key === "Enter" || key === "." || key === "@" || key === "←" || key === "Mayus"
               ? "bg-[#353068] text-white hover:bg-[#534baf]" // Color especial para teclas
               : "border-orange-500 text-orange-500 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500" // Color normal
-          }.  ${key === "Mayus" && isUpperCase ? "bg-[#534baf]" : ""}`}
+          }.  ${key === "Mayus" && isUpperCase ? "bg-[#534baf]" : ""}
+          `}
         >
           {key === "Mayus" ? "Mayus" : key} {/* Representar la tecla Shift */}
         </button>
@@ -41,8 +40,8 @@ const VirtualKeyboardFull = ({ onKeyPress }) => {
     <div className="bg-white p-4 rounded-lg shadow-md overflow-hidden flex flex-col items-center">
       {renderRow(["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "←"])}
       {renderRow(["@", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p"])}
-      {renderRow(["a", "s", "d", "f", "g", "h", "j", "k", "l", "Enter"])}
-      {renderRow(["Mayus", "z", "x", "c", "v", "b", "n", "m", "."])} {/* Agregar Shift */}
+      {renderRow(["a", "s", "d", "f", "g", "h", "j", "k", "l","Mayus",])}
+      {renderRow([ "z", "x", "c", "v", "b", "n", "m", "."])} {/* Agregar Shift */}
       {renderRow(["Espacio"])}
       {/* Logo en el centro inferior */}
       <div className="flex justify-center mt-4 mb-2">

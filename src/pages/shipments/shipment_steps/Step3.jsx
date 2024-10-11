@@ -476,7 +476,7 @@ export default function Step3({
       )}
 
       {showConfirmation && (
-        <div>
+        <div >
           <h1 className="text-3xl font-semibold mb-6">Confirmar Datos</h1>
           <div className="flex gap-8">
             <PackageFormSection
@@ -504,8 +504,8 @@ export default function Step3({
       )}
 
       {step1 && (
-        <div>
-          <div className="flex gap-8">
+        <div className=" fixed flex flex-row gap-10 top-[180px]  left-[450px]  ">
+          <div className=" ">
             <PackageFormSection
               packageFields={packageFields}
               title="Datos del Paquete"
@@ -515,12 +515,14 @@ export default function Step3({
             />
           </div>
 
-          <button
+       <div>
+       <button
             onClick={handleContinue}
             className="bg-orange-500 text-white text-xl font-semibold px-6 py-3  mt-6 rounded-full"
           >
             Continuar
           </button>
+       </div>
         </div>
       )}
     </div>

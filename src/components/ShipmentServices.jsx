@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import animationLoading from "../assets/icons/loading.mp4";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 const NO_QUOTES_ERROR = "No se encontraron cotizaciones.";
 const LOADING_MESSAGE = "Cargando cotizaciones...";
 
@@ -11,6 +12,7 @@ export default function ShipmentServices({
   logoMap,
 }) {
 
+  const {  gavetaAvailable} = useAuth();
 
   const navigate = useNavigate(); // Inicializa useNavigate
   

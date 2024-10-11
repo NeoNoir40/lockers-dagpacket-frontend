@@ -1,8 +1,9 @@
 .keyboard {
     display: none;
-    position: fixed;
-    bottom: 0;
-    transform: translateX(230%);
+    position: absolute;
+    top: 60%;    
+
+    transform: translateX(200%);
     max-width: 100%;
     padding: 10px;
     background-color: #f0f0f0;
@@ -12,7 +13,7 @@
   }
   
   .keyboard.visible {
-    display: block;
+    display: grid;
   }
   
   .keyboard-row {
@@ -22,7 +23,7 @@
   }
   
   .key {
-    min-width: 70px;
+    min-width: 100px;
     padding: 20px;
     margin: 4px;
     cursor: pointer;
