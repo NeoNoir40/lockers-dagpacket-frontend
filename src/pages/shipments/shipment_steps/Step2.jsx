@@ -16,6 +16,9 @@ const scale = localStorage.getItem("Pesa");
     handleClick(3);
   };
 
+  console.log("Locker ID:", id_locker);
+  console.log("Pesa:", scale);
+
   const { gavetaAvailable } = useAuth();
 
   const navigate = useNavigate(); // Inicializa useNavigate
@@ -58,18 +61,20 @@ const scale = localStorage.getItem("Pesa");
 
   
 
-  
+
     const handleOpenDoor = async () => {
-      // console.log("Abriendo locker...", scale);
       try {
         const TOKEN = localStorage.getItem("token");
+    
+        // Abrir el locker
         const openDoorResponse = await axios.post(
-          `${api}/mqtt/`,
+          `${api}/mqtt`,
           {
             locker_id: id_locker,
             action: "sendLocker",
             gabeta: scale,
-          },{
+          },
+          {
             headers: {
               Authorization: `Bearer ${TOKEN}`,
             },
@@ -78,47 +83,71 @@ const scale = localStorage.getItem("Pesa");
     
         if (!openDoorResponse.data.error) {
           setOpenDoor(true);
-          const weightResponse = await axios.post(
-            `${api}/api/v1/mqtt/`,
-            {
-              locker_id: "2",
-              action: "getWeight",
-              gabeta: "100",
-            },{
-              headers: {
-                Authorization: `Bearer ${TOKEN}`,
-              },
-            }
-          );
-
-          if (!weightResponse.data.error) {
-            const message = weightResponse.data.message; // Ajusta según tu API
-            const weight = message.split(':')[1].trim();  // Obtener la parte después de ':'
-            setWeight(weight);
-            onWeightChange(weight);
-            handleClick(3);
-            console.log("Peso detectado:", weight);
-            Swal.fire({
-              title: "Peso Detectado",
-              text: `El peso detectado es de ${weight} kg.`,
-              icon: "info",
-              confirmButtonText: "OK",
-            });
-          } else {
-            Swal.fire({
-              title: "Error",
-              text: `No se pudo obtener el peso.`,
-              icon: "error",
-              confirmButtonText: "OK",
-            });
-          }
-          
+    
+          // Mostrar alerta de éxito de apertura
           Swal.fire({
             title: "Locker Abierto",
             text: `El locker se ha abierto correctamente.`,
             icon: "success",
             confirmButtonText: "OK",
           });
+    
+          // Iniciar polling para obtener el peso hasta que la puerta esté cerrada
+          const pollWeight = async () => {
+            const weightResponse = await axios.post(
+              `${api}/mqtt`,
+              {
+                locker_id: id_locker,
+                action: "getWeight",
+                gabeta: scale,
+              },
+              {
+                headers: {
+                  Authorization: `Bearer ${TOKEN}`,
+                },
+              }
+            );
+    
+            if (!weightResponse.data.error) {
+              const message = weightResponse.data.message; // Ajusta según tu API
+              const [weightData, doorStatus] = message.split(":")[1].trim().split(","); // Obtener peso y estado de puerta
+              const weight = weightData.trim();
+              const isDoorClosed = doorStatus === "0"; // Puerta cerrada si es "0"
+    
+              if (isDoorClosed) {
+                // Puerta cerrada: mostrar el peso y detener el polling
+                setWeight(weight);
+                onWeightChange(weight);
+                handleClick(3);
+                console.log("Peso detectado:", weight);
+    
+                Swal.fire({
+                  title: "Peso Detectado",
+                  text: `El peso detectado es de ${weight} kg.`,
+                  icon: "info",
+                  confirmButtonText: "OK",
+                });
+              } else {
+                // Si la puerta está abierta, repetir la consulta
+                Swal.fire({
+                  title: "Locker Abierto",
+                  text: `La puerta del locker está abierta.`,
+                  icon: "info",
+                  confirmButtonText: "OK",
+                });
+                setTimeout(pollWeight, 2000); // Reintentar en 2 segundos (puedes ajustar el tiempo)
+              }
+            } else {
+              Swal.fire({
+                title: "Error",
+                text: `No se pudo obtener el peso.`,
+                icon: "error",
+                confirmButtonText: "OK",
+              });
+            }
+          };
+    
+          pollWeight(); // Iniciar el polling
         } else {
           Swal.fire({
             title: "Error",
@@ -139,14 +168,66 @@ const scale = localStorage.getItem("Pesa");
     };
     
 
+    
+// Función para obtener el peso del locker pero es para testear
+ const getWeightFromLocker = async () => {
+  const TOKEN = localStorage.getItem("token");
+  try {
+    const weightResponse = await axios.post(
+      `${api}/mqtt`,
+      {
+        locker_id: id_locker,
+        action: "getWeight",
+        gabeta: scale,
+      },{
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      }
+    );
+
+    if (!weightResponse.data.error) {
+      const message = weightResponse.data.message; // Ajusta según tu API
+      const weight = message.split(':')[1].trim();  // Obtener la parte después de ':'
+      console.log("Peso detectado:", message);
+      setWeight(weight);
+      onWeightChange(weight);
+      handleClick(3);
+      console.log("Peso detectado:", weight);
+      Swal.fire({
+        title: "Peso Detectado",
+        text: `El peso detectado es de ${weight} kg.`,
+        icon: "info",
+        confirmButtonText: "OK",
+      });
+    } else {
+      Swal.fire({
+        title: "Error",
+        text: `No se pudo obtener el peso.`,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    Swal.fire({
+      title: "Error",
+      text: `No se pudo obtener el peso.`,
+      icon: "error",
+      confirmButtonText: "OK",
+    });
+  }
+};
+    
+
     const handleCheckDoor = async () => {
       try {
         const checkDoorResponse = await axios.post(
-          `${api}/api/v1/mqtt/`,
+          `${api}/mqtt`,
           {
-            locker_id: "2",
+            locker_id: id_locker,
             action: "checkDoor", // Cambiado a "checkDoor"
-            gabeta: "100",
+            gabeta: scale,
           },{
             headers: {
               Authorization: `Bearer ${TOKEN}`,

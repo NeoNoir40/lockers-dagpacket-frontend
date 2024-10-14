@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import loading_animtation from "../../../assets/icons/loading.mp4";
 import animationPaymet from "../../../assets/lotties/js/payment_terminal.json";
 import Lottie from "lottie-react";
+import { set } from "react-hook-form";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 export default function Step4({ handleClick, shippingData }) {
   const { user } = useAuth();
@@ -294,10 +295,13 @@ export default function Step4({ handleClick, shippingData }) {
 
   const simulePayment = () => {
     Swal.fire({
-      icon: "error",
-      title: "Pago no realizado",
-      text: "Ocurrio un error al intentar procesar el pago.",
-    });
+      icon: "success",
+      title: "Pago realizado con éxito",
+    }).then(() => {
+      handleClick(5);
+    }
+    );
+   
   }
 
   return (

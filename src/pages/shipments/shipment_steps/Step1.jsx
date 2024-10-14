@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import Logo from "../../../assets/images/logo.webp";
 import animationMap from "../../../assets/lotties/js/map.json";
@@ -28,10 +28,10 @@ export default function Step1({
   //Funciones para usar el teclado virtual en el modal
   const [activeInputModal, setActiveInputModal] = useState(null);
   const keyboardRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleKeyPress = (val) => {
     if (val === "") {
-      // Si es borrar, quitamos el último carácter
       setFolioInput((prev) => prev.slice(0, -1));
     } else if (val === " " || val === "@" || val === ".") {
       Swal.fire({
@@ -147,6 +147,8 @@ export default function Step1({
       onCPChange(inputValue); // Ensure the postal code is set
     }
 
+
+
     // If the package type is 'Sobre', go to step 3, else go to step 2
     if (packageType === "Sobre") {
       handleWeightChange(0.5);
@@ -158,6 +160,8 @@ export default function Step1({
     }
   };
 
+
+
   const handleSubmit = () => {
     handleContinue();
   };
@@ -167,10 +171,17 @@ export default function Step1({
     setPackageIsSelected(true);
   };
 
+  
+  if(inputValue === "00000") {
+    navigate("/login");
+  }
+
   useEffect(() => {
     if (handleContinue) {
       getGabetas();
     }
+
+
   }, []);
 
   return (

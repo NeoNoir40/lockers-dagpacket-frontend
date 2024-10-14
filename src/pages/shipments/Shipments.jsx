@@ -190,7 +190,7 @@ export default function Shipment() {
         {currentStep === 4 && (
           <Step4
             shippingData={shippingData}
-            handleStepChange={handleStepChange}
+            handleClick={handleStepChange}
           />
         )}
         {currentStep === 5 && (

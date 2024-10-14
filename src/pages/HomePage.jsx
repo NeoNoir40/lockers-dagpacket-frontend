@@ -34,8 +34,9 @@ const HomePage = () => {
 
 
   return (
-    <main className="flex flex-col w-full min-h-[100vh] bg-white overflow-hidden">
-      <div id="topSection" className="grid grid-cols-2 w-full h-[55vh]">
+    <main
+    className="flex flex-col w-full min-h-[100vh] bg-white overflow-hidden overscroll-none ">
+      <div id="topSection" className="grid grid-cols-2 w-full  h-[55vh]">
         <div className="flex flex-col gap-4 justify-center items-center">
           <img src={Logo} alt="Logo" className="mb-12 w-1/2" />
           <h1 className="text-4xl font-semibold mx-8">
