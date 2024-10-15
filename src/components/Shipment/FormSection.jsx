@@ -364,7 +364,7 @@ export const PackageFormSection = ({ title, data, onChange, disabled }) => {
 
       {/* Teclado virtual siempre visible */}
       <div
-        className={`absolute top-[110%]  ${
+        className={`absolute top-[30%]  ${
           activeInput ? "" : "hidden"
         }`}
         ref={keyboardRef}>

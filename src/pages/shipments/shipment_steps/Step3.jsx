@@ -129,7 +129,7 @@ export default function Step3({
         const title = gavetaAvailable === null ? "Gaveta no asignada" : "Sin Gavetas Disponibles por el momento";
         
         let timerInterval;
-  
+
         Swal.fire({
           icon: "error",
           title: title,
@@ -365,7 +365,7 @@ export default function Step3({
   };
 
   return (
-    <div className="p-6 overflow-hidden">
+    <div className="p-6 ">
       {step5 && (
         <>
           <ShipmentInfo data={shippingData} handleClick={handleClick} />
@@ -504,7 +504,7 @@ export default function Step3({
       )}
 
       {step1 && (
-        <div className=" fixed flex flex-row gap-10 top-[180px]  left-[450px]  ">
+        <div className=" h-full w-full fixed flex flex-row gap-10 top-[180px]  left-[450px]  ">
           <div className=" ">
             <PackageFormSection
               packageFields={packageFields}

@@ -7,6 +7,7 @@ import axios from 'axios'
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2"; // Importa SweetAlert
+import Audio from '../../assets/voice/recibir_paquete.mp3'
 import { Link } from "react-router-dom";
 import "../../assets/css/shipment/shipment.css";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
@@ -17,8 +18,13 @@ const id_locker = localStorage.getItem("id_locker");
 const userAgent = localStorage.getItem("userAgent");
 
 export default function Recolect() {
+  const audioRef = useRef(null); // Añadir referencia para el audio
+
   const [currentStep, setCurrentStep] = useState(1);
   const [gaveta, setGaveta] = useState([]);
+  const [doorOpenAlertShown, setDoorOpenAlertShown] = useState(false);
+
+
   const inputRef = useRef(null);
 
   const navigate = useNavigate();
@@ -32,7 +38,6 @@ export default function Recolect() {
       action: action,
       device: userAgent , // Solo añade delivery si existe
     };
-  
     try {
       const logResponse = await logGaveta(logData);
       if (logResponse.success) {
@@ -65,38 +70,42 @@ export default function Recolect() {
   };
 
   const handleOpenDoor = async () => {
+    console.log("Locker ID:", locker_id);
+    console.log("Gaveta ID:", gaveta.id_gabeta);
     try {
-      // const openDoorResponse = await axios.post(
-      //   `${api}/mqtt/`,
-      //   {
-      //     locker_id: locker_id,
-      //     action: "sendLocker",
-      //     gabeta: gaveta.id_gabeta,
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${TOKEN}`,
-      //     },
-      //   }
-      // );
+      const openDoorResponse = await axios.post(
+        `${api}/mqtt/`,
+        {
+          locker_id: locker_id,
+          action: "receiveLocker",
+          gabeta: gaveta.id_gabeta,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      );
 
-      // if (!openDoorResponse.data.error) {
-      //   Swal.fire({
-      //     title: "Locker Abierto",
-      //     text: `El locker se ha abierto correctamente.`,
-      //     icon: "success",
-      //     confirmButtonText: "OK",
-      //   });
+      if (!openDoorResponse.data.error) {
+        Swal.fire({
+          title: "Locker Abierto",
+          text: `El locker se ha abierto correctamente.`,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
         // Llama a la función de log al abrir la gaveta
         await handleLogGaveta("Recibir paquete");
-      // } else {
-      //   Swal.fire({
-      //     title: "Error",
-      //     text: `No se pudo abrir el Locker.`,
-      //     icon: "error",
-      //     confirmButtonText: "OK",
-      //   });
-      // }
+        await handleCheckStatusDoor();
+
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: `No se pudo abrir el Locker.`,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
     } catch (error) {
       console.error(error);
       Swal.fire({
@@ -107,6 +116,62 @@ export default function Recolect() {
       });
     }
   };
+
+  const handleCheckStatusDoor = async () => {
+    try {
+      const checkDoorResponse = await axios.post(
+        `${api}/mqtt/`,
+        {
+          locker_id: locker_id,
+          action: "checkDoor",
+          gabeta: gaveta.id_gabeta,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      );
+  
+      if (checkDoorResponse.data.error) {
+        console.error("Error al verificar el estado de la puerta:", checkDoorResponse.data);
+        return;
+      }
+  
+      const doorStatusRaw = checkDoorResponse.data.message;
+      const doorStatus = parseInt(doorStatusRaw.split(': ')[1]);
+  
+      if (doorStatus === 1 && !doorOpenAlertShown) {
+        // Puerta abierta y aún no hemos mostrado la alerta
+        setDoorOpenAlertShown(true);
+        Swal.fire({
+          title: "Puerta Abierta",
+          text: "Por favor, cierre la puerta de la gaveta cuando ingrese su paquete.",
+          icon: "warning",
+          confirmButtonText: "OK",
+        });
+        // Programar la próxima verificación
+        setTimeout(handleCheckStatusDoor, 5000);
+      } else if (doorStatus === 0) {
+        // Puerta cerrada
+        setDoorOpenAlertShown(false);
+        Swal.fire({
+          title: "Gracias",
+          text: "La puerta de la gaveta está correctamente cerrada.",
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+        // Aquí puedes agregar lógica adicional para pasar al siguiente paso si es necesario
+      } else if (doorStatus === 1 && doorOpenAlertShown) {
+        // Puerta sigue abierta, pero ya mostramos la alerta. Seguimos verificando.
+        setTimeout(handleCheckStatusDoor, 5000);
+      }
+    } catch (error) {
+      console.error("Error al verificar el estado de la puerta:", error);
+    }
+  };
+
+
   
   const onSubmit = async (data) => {
     try {
@@ -114,7 +179,7 @@ export default function Recolect() {
       console.log(response);
       if (response.success) {
         setCurrentStep(2);
-        setGaveta(response.message);
+        setGaveta(response.data);
       }else{
         Swal.fire({
           title: "Error",
@@ -127,6 +192,8 @@ export default function Recolect() {
       console.log(e);
     }
   };
+
+
   useEffect(() => {
     if (currentStep === 1 && inputRef.current) {
       inputRef.current.focus();
@@ -156,6 +223,9 @@ useEffect(() => {
   useEffect(() => {
     if (currentStep === 2) {
      handleOpenDoor()
+     if (audioRef.current) {
+      audioRef.current.play(); // Reproduce el audio en step2
+    }
     }
   }, [currentStep]);
 
@@ -211,7 +281,6 @@ useEffect(() => {
     register("pin").ref(e);
     inputRef.current = e;
   }}
-  // style={{ position: 'absolute', left: '-9999px' }}
 />
             </form>
           </div>
@@ -241,6 +310,9 @@ useEffect(() => {
                 ))}
               </div>
             </div>
+            <audio ref={audioRef}>
+              <source src={Audio} type="audio/mp3" />
+            </audio>
           </div>
         )}
         {currentStep === 3 && (
@@ -257,7 +329,9 @@ useEffect(() => {
               Asegúrate de que el locker esté{" "}
               <span className="text-orange-500">correctamente cerrado</span>
             </h1>
+            
           </div>
+          
         )}
       </main>
     </body>

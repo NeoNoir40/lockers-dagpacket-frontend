@@ -80,6 +80,22 @@ export default function Shipment() {
     }));
   };
 
+    // Define handlePackage to accept height, width, length, weight, and value
+    const handlePackage = (type,height, width, length, weight, value) => {
+      setShippingData((prev) => ({
+        ...prev,
+        package: {
+          ...prev.package,
+          type: type,
+          height,
+          width,
+          length,
+          weight,
+          value,
+        },
+      }));
+    };
+
   const handleSenderDataChange = (data) => {
     setShippingData((prev) => ({
       ...prev,
@@ -170,6 +186,7 @@ export default function Shipment() {
         {currentStep === 2 && (
           <Step2
             weight={weight}
+            handlePackage={handlePackage}
             onWeightChange={handleWeightChange}
             handleClick={handleStepChange}
           />
