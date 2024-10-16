@@ -6,31 +6,31 @@ const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 import { useAuth } from "../../../../context/AuthContext";
 import "../../../assets/css/shipment/shipment.css";
 
-const Step2 = ({ handleClick, onWeightChange,handlePackage }) => {
+const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
   const [detectedWeight, setDetectedWeight] = useState("");
   const [openDoor, setOpenDoor] = useState(false);
   const [weight, setWeight] = useState("");
-const [showContinueButton, setShowContinueButton] = useState(false);
+  const [showContinueButton, setShowContinueButton] = useState(false);
   const id_locker = localStorage.getItem("locker_id");
   const scale = localStorage.getItem("Pesa");
+
   const handleContinue = () => {
     handleClick(3);
   };
 
-  useEffect(() => {
-    // Datos simulados
-    const packageType = "Paquete"; // Tipo de paquete
-    const simulatedHeight = 30; // Altura en cm
-    const simulatedWidth = 20; // Ancho en cm
-    const simulatedLength = 10; // Longitud en cm
-    const simulatedWeight = 5; // Peso en kg
+  // useEffect(() => {
+  //   // Datos simulados
+  //   const packageType = "Paquete"; // Tipo de paquete
+  //   const simulatedHeight = 30; // Altura en cm
+  //   const simulatedWidth = 20; // Ancho en cm
+  //   const simulatedLength = 10; // Longitud en cm
+  //   const simulatedWeight = 5; // Peso en kg
 
-    // Llama a handlePackage con datos simulados
-    handlePackage(packageType,simulatedHeight, simulatedWidth, simulatedLength, simulatedWeight);
-    setDetectedWeight(simulatedWeight); // Establecer el peso detectado para propósitos de prueba
-    setShowContinueButton(true); // Mostrar el botón continuar
-  }, []); // Ejecutar una vez al montar el componente
-
+  //   // Llama a handlePackage con datos simulados
+  //   handlePackage(packageType,simulatedHeight, simulatedWidth, simulatedLength, simulatedWeight);
+  //   setDetectedWeight(simulatedWeight); // Establecer el peso detectado para propósitos de prueba
+  //   setShowContinueButton(true); // Mostrar el botón continuar
+  // }, []); // Ejecutar una vez al montar el componente
 
   // console.log("Locker ID:", id_locker);
   // console.log("Pesa:", scale);
@@ -93,17 +93,38 @@ const [showContinueButton, setShowContinueButton] = useState(false);
         }
       );
       if (!measureResponse.data.error) {
-        const message = measureResponse.data.message;
-        // Ajusta según tu API
-        console.log("Medida detectada:", message);
-        Swal.fire({
-          title: "Medida Detectada",
-          text: `La medida detectada es de ${message}         cm.`,
-          icon: "info",
-          confirmButtonText: "OK",
-        });
-        handleClick(3);
-      }
+  const message = measureResponse.data.message;
+  const medidas = message.split("sendMeasure: ")[1].split(",");
+  
+  // Extraer ancho, largo, alto y convertirlos a números
+  const ancho = parseFloat(medidas[0]);
+  const largo = parseFloat(medidas[1]);
+  const alto = parseFloat(medidas[2]);
+
+  // Suponiendo que 'weight' está disponible en la respuesta o en alguna otra parte del código
+  const weight = detectedWeight; // Peso detectado
+  
+  const paqueteTipo = "Paquete"; // Tipo de paquete
+
+  console.log("Ancho:", ancho); // Ejemplo: 22.59
+  console.log("Largo:", largo); // Ejemplo: 29.43
+  console.log("Alto:", alto); // Ejemplo: 25.55
+
+
+  // Llama a handlePackage con las medidas detectadas y el peso convertido
+  handlePackage(paqueteTipo, ancho, largo, alto, weight);
+
+  console.log("Medida detectada:", message);
+
+  Swal.fire({
+    title: "Medida Detectada",
+    text: `La medida detectada es de ${ancho} x ${largo} x ${alto} cm y el peso es de ${weight} kg.`,
+    icon: "info",
+    confirmButtonText: "OK",
+  });
+
+  handleClick(3);
+}
     } catch (error) {
       console.error(error);
       Swal.fire({
@@ -317,12 +338,12 @@ const [showContinueButton, setShowContinueButton] = useState(false);
         id="continueButton"
         className="px-8 py-2 bg-orange-500 text-white text-bold text-xl rounded-full"
         type="button"
-        onClick={handleContinue}
+        onClick={handleOpenDoor}
         style={{
           display: showContinueButton ? "block" : "none",
         }}
       >
-        Continuar
+        Iniciar pesado
       </button>
       {/* <button
         onClick={handleOpenDoor}

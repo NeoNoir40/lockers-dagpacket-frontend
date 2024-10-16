@@ -222,6 +222,8 @@ export default function Step4({ handleClick, shippingData }) {
         }
       );
 
+      console.log("response", response.data);
+
       if (response.data.success == false) {
         Swal.fire({
           icon: "error",
@@ -232,6 +234,7 @@ export default function Step4({ handleClick, shippingData }) {
       }
 
       localStorage.setItem("shipment_id", response.data.shipment);
+      console.log("shipment_id", response.data.shipment);
       setFolio(response.data.shipment);
       Swal.fire({
         icon: "success",

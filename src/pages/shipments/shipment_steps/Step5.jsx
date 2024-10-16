@@ -4,6 +4,7 @@ import axios from "axios";
 import "../../../assets/css/shipment/shipment.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
+import {updateSaturation} from '../../../../context/auth'
 
 const api = import.meta.env.VITE_REACT_API_URL;
 
@@ -13,8 +14,18 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   const { user } = useAuth();
   const locker_id = localStorage.getItem("locker_id");
   const gabeta_id = localStorage.getItem("idGabeta");
+  const _idgabeta = localStorage.getItem("_idgabeta");
+  console.log("Gabeta ID:", gabeta_id);
+  const shipment_id = localStorage.getItem("shipment_id");
+  const user_id = localStorage.getItem("user_id");
+  console.log("Locker ID:", locker_id);
+  console.log("User ID:", _idgabeta);
 
   const navigate = useNavigate();
+
+    // Define initial state for data
+
+  
 
   // Commented out guide generation and saving functions
   /*
@@ -65,6 +76,30 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
     }
   };
   */
+
+
+  const updateGabetaSaturation = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        `${api}/gabeta/update-saturation`,
+        {
+          _id: _idgabeta,
+          package:shipment_id,
+          saturation: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
 
   const handleOpenDoor = async () => {
     try {
@@ -158,6 +193,7 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
       });
     }
   };
+
   
   const handleCloseDoor = async () => {
     let isClosed = false;
@@ -207,6 +243,10 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
     }, 5000);
   
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    updateGabetaSaturation();
   }, []);
 
   return (

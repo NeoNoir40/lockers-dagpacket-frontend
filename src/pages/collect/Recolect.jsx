@@ -8,6 +8,8 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2"; // Importa SweetAlert
 import Audio from '../../assets/voice/recibir_paquete.mp3'
+import ErrorAudio from '../../assets/voice/error_open_gaveta.mp3'
+import Thanks from '../../assets/voice/agradecimiento.mp3'
 import { Link } from "react-router-dom";
 import "../../assets/css/shipment/shipment.css";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
@@ -17,10 +19,12 @@ const TOKEN = localStorage.getItem("token");
 const id_locker = localStorage.getItem("id_locker");
 const userAgent = localStorage.getItem("userAgent");
 
-export default function Recolect() {
+export default function Recolect(xf) {
   const audioRef = useRef(null); // Añadir referencia para el audio
-
+  const audioErrorRef = useRef(null); // Añadir referencia para el audio de error
+  const audioThanksRef = useRef(null); // Añadir referencia para el audio de agradecimiento
   const [currentStep, setCurrentStep] = useState(1);
+  const [error, setError] = useState(false);
   const [gaveta, setGaveta] = useState([]);
   const [doorOpenAlertShown, setDoorOpenAlertShown] = useState(false);
 
@@ -29,8 +33,29 @@ export default function Recolect() {
 
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
+  const _idgabeta = localStorage.getItem("_idgabeta");
 
-
+  const updateGabetaSaturation = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.patch(
+        `${api}/gabeta/update-saturation`,
+        {
+          _id: _idgabeta,
+          package:'nada',
+          saturation: false,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response);
+    } catch (e) {
+      console.log(e);
+    }
+  }
   const handleLogGaveta = async (action) => {
     const logData = {
       gabeta_id: gabeta_id,
@@ -95,6 +120,7 @@ export default function Recolect() {
           confirmButtonText: "OK",
         });
         // Llama a la función de log al abrir la gaveta
+        await updateGabetaSaturation();
         await handleLogGaveta("Recibir paquete");
         await handleCheckStatusDoor();
 
@@ -105,6 +131,9 @@ export default function Recolect() {
           icon: "error",
           confirmButtonText: "OK",
         });
+        if (audioErrorRef.current) {
+          audioErrorRef.current.play();
+        }
       }
     } catch (error) {
       console.error(error);
@@ -114,6 +143,9 @@ export default function Recolect() {
         icon: "error",
         confirmButtonText: "OK",
       });
+      if (audioErrorRef.current) {
+        audioErrorRef.current.play();
+      }
     }
   };
 
@@ -198,6 +230,11 @@ export default function Recolect() {
     if (currentStep === 1 && inputRef.current) {
       inputRef.current.focus();
     }
+
+    if(currentStep === 3 && audioThanksRef.current){
+      audioThanksRef.current.play();
+    }
+
   }, [currentStep]);
 
 useEffect(() => {
@@ -226,8 +263,15 @@ useEffect(() => {
      if (audioRef.current) {
       audioRef.current.play(); // Reproduce el audio en step2
     }
+
+    
+    
+
     }
   }, [currentStep]);
+
+  // Effect to show notification after 5 seconds in step 2
+
 
   // console.log(gaveta.id_gabeta);
 
@@ -329,10 +373,19 @@ useEffect(() => {
               Asegúrate de que el locker esté{" "}
               <span className="text-orange-500">correctamente cerrado</span>
             </h1>
+            <audio ref={audioThanksRef}>
+              <source
+                src={Thanks}
+                type="audio/mp3"
+              />
+            </audio>
             
           </div>
           
         )}
+        <audio ref={audioErrorRef}>
+  <source src={ErrorAudio} type="audio/mp3" />
+</audio>
       </main>
     </body>
   );

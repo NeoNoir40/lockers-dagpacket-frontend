@@ -10,6 +10,8 @@ import VirtualKeyboard from "../../../components/VirtualKeyboard.jsx/VirtualKerb
 import VirtualKeyboardFull from "../../../components/Shipment/VirtualKeyboard";
 import { useAuth } from "../../../../context/AuthContext";
 import { getShipmentInfo } from "../../../../context/auth";
+import SelectPackage from '../../../assets/voice/select_package.mp3'
+import CodigoPostal from '../../../assets/voice/cp.mp3'
 import Swal from "sweetalert2";
 
 export default function Step1({
@@ -27,6 +29,8 @@ export default function Step1({
   const [folioInput, setFolioInput] = useState("");
   //Funciones para usar el teclado virtual en el modal
   const [activeInputModal, setActiveInputModal] = useState(null);
+  const audioPackage = useRef(null);
+  const audioCP = useRef(null);
   const keyboardRef = useRef(null);
   const navigate = useNavigate();
 
@@ -154,9 +158,18 @@ export default function Step1({
       handleWeightChange(0.5);
       handlePackage(packageType);
       handleClick(3);
+      if (audioCP.current) {
+        audioCP.current.play();
+      }
+      if(audioPackage.current){
+        audioPackage.current.stop();
+      }
     } else {
       handlePackage(packageType);
       handleClick(2);
+      if(audioPackage.current){
+        audioPackage.current.play();
+      }
     }
   };
 
@@ -169,7 +182,11 @@ export default function Step1({
   const selectPackageType = (type) => {
     setPackageType(type);
     setPackageIsSelected(true);
-  };
+  }
+
+  // if(packageIsSelected === false) {
+    
+  // }
 
   
   if(inputValue === "00000") {
@@ -183,6 +200,8 @@ export default function Step1({
 
 
   }, []);
+
+
 
   return (
     <>
@@ -242,9 +261,12 @@ export default function Step1({
               Continuar
             </button>
           </div>
+          <audio ref={audioCP} src={CodigoPostal} type="audio/mp3" autoPlay/>
+
         </>
       ) : (
         <>
+          <audio ref={audioPackage} src={SelectPackage} type="audio/mp3" autoPlay/>
           <div className="flex flex-col justify-center items-center gap-16 w-[100vw] absolute overflow-hidden">
             <h1 className="text-4xl font-semibold mx-8 text-center">
               Selecciona el tipo de{" "}
