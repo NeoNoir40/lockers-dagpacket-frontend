@@ -144,7 +144,7 @@ export default function Step4({ handleClick, shippingData }) {
       height: shippingData.package.height,
       width: shippingData.package.width,
       length: shippingData.package.length,
-      package_weight: shippingData.package.weight,
+      package_weight: shippingData.package.weight || 10,
       volumetric_weight: 1.6,
     },
     insurance: 0.0,

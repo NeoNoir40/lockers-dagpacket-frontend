@@ -100,7 +100,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
   const ancho = parseFloat(medidas[0]);
   const largo = parseFloat(medidas[1]);
   const alto = parseFloat(medidas[2]);
-
+        const value = 1000
   // Suponiendo que 'weight' está disponible en la respuesta o en alguna otra parte del código
   const weight = detectedWeight; // Peso detectado
   
@@ -112,7 +112,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
 
 
   // Llama a handlePackage con las medidas detectadas y el peso convertido
-  handlePackage(paqueteTipo, ancho, largo, alto, weight);
+  handlePackage(paqueteTipo, ancho, largo, alto, weight,value);
 
   console.log("Medida detectada:", message);
 
