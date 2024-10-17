@@ -11,6 +11,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
   const [openDoor, setOpenDoor] = useState(false);
   const [weight, setWeight] = useState("");
   const [showContinueButton, setShowContinueButton] = useState(false);
+  const [loading, setLoading] = useState(false);
   const id_locker = localStorage.getItem("locker_id");
   const scale = localStorage.getItem("Pesa");
 
@@ -18,22 +19,22 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
     handleClick(3);
   };
 
-  // useEffect(() => {
-  //   // Datos simulados
-  //   const packageType = "Paquete"; // Tipo de paquete
-  //   const simulatedHeight = 30; // Altura en cm
-  //   const simulatedWidth = 20; // Ancho en cm
-  //   const simulatedLength = 10; // Longitud en cm
-  //   const simulatedWeight = 5; // Peso en kg
+  useEffect(() => {
+    // Datos simulados
+    const packageType = "Paquete"; // Tipo de paquete
+    const simulatedHeight = 30.10; // Altura en cm
+    const simulatedWidth = 20.50; // Ancho en cm
+    const simulatedLength = 10.20; // Longitud en cm
+    const simulatedWeight = 5.30; // Peso en kg
 
-  //   // Llama a handlePackage con datos simulados
-  //   handlePackage(packageType,simulatedHeight, simulatedWidth, simulatedLength, simulatedWeight);
-  //   setDetectedWeight(simulatedWeight); // Establecer el peso detectado para propósitos de prueba
-  //   setShowContinueButton(true); // Mostrar el botón continuar
-  // }, []); // Ejecutar una vez al montar el componente
+    // Llama a handlePackage con datos simulados
+    handlePackage(packageType,simulatedHeight, simulatedWidth, simulatedLength, simulatedWeight);
+    setDetectedWeight(simulatedWeight); // Establecer el peso detectado para propósitos de prueba
+    setShowContinueButton(true); // Mostrar el botón continuar
+  }, []); // Ejecutar una vez al montar el componente
 
-  // console.log("Locker ID:", id_locker);
-  // console.log("Pesa:", scale);
+  console.log("Locker ID:", id_locker);
+  console.log("Pesa:", scale);
 
   const { gavetaAvailable } = useAuth();
 
@@ -100,7 +101,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
   const ancho = parseFloat(medidas[0]);
   const largo = parseFloat(medidas[1]);
   const alto = parseFloat(medidas[2]);
-        const value = 1000
+  const value = 1000
   // Suponiendo que 'weight' está disponible en la respuesta o en alguna otra parte del código
   const weight = detectedWeight; // Peso detectado
   
@@ -112,17 +113,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
 
 
   // Llama a handlePackage con las medidas detectadas y el peso convertido
-  handlePackage(paqueteTipo, ancho, largo, alto, weight,value);
-
-  console.log("Medida detectada:", message);
-
-  Swal.fire({
-    title: "Medida Detectada",
-    text: `La medida detectada es de ${ancho} x ${largo} x ${alto} cm y el peso es de ${weight} kg.`,
-    icon: "info",
-    confirmButtonText: "OK",
-  });
-
+  handlePackage(paqueteTipo,alto,ancho,largo, value);
   handleClick(3);
 }
     } catch (error) {
@@ -136,10 +127,23 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
     }
   };
 
+  useEffect(() => {
+    if (loading) {
+      Swal.fire({
+        title: "Cargando...",
+        text: "Por favor espera mientras se completa el proceso.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+    } 
+  }, [loading]);
+
   const handleOpenDoor = async () => {
+    setLoading(true);
     try {
       const TOKEN = localStorage.getItem("token");
-
       // Abrir el locker
       const openDoorResponse = await axios.post(
         `${api}/mqtt`,
@@ -157,7 +161,6 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
 
       if (!openDoorResponse.data.error) {
         setOpenDoor(true);
-
         // Mostrar alerta de éxito de apertura
         Swal.fire({
           title: "Locker Abierto",
@@ -165,7 +168,6 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
           icon: "success",
           confirmButtonText: "OK",
         });
-
         // Iniciar polling para obtener el peso hasta que la puerta esté cerrada
         const pollWeight = async () => {
           const weightResponse = await axios.post(
@@ -195,15 +197,6 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
               // Puerta cerrada: mostrar el peso y detener el polling
               setWeight(weight);
               onWeightChange(weight);
-              console.log("Peso detectado:", weight);
-
-              Swal.fire({
-                title: "Peso Detectado",
-                text: `El peso detectado es de ${weight} kg.`,
-                icon: "info",
-                confirmButtonText: "OK",
-              });
-
               getMesaure();
             } else {
               // Si la puerta está abierta, repetir la consulta
@@ -218,13 +211,12 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
           } else {
             Swal.fire({
               title: "Error",
-              text: `No se pudo obtener el peso.`,
+              text: `No se pudo pesar el paquete.`,
               icon: "error",
               confirmButtonText: "OK",
             });
           }
         };
-
         pollWeight(); // Iniciar el polling
       } else {
         Swal.fire({
@@ -235,6 +227,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
         });
       }
     } catch (error) {
+      setLoading(false);
       console.error(error);
       Swal.fire({
         title: "Error",
@@ -242,58 +235,11 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
         icon: "error",
         confirmButtonText: "OK",
       });
+    }finally{
+      setLoading(false);
     }
   };
 
-  // Función para obtener el peso del locker pero es para testear
-  //  const getWeightFromLocker = async () => {
-  //   const TOKEN = localStorage.getItem("token");
-  //   try {
-  //     const weightResponse = await axios.post(
-  //       `${api}/mqtt`,
-  //       {
-  //         locker_id: id_locker,
-  //         action: "getWeight",
-  //         gabeta: scale,
-  //       },{
-  //         headers: {
-  //           Authorization: `Bearer ${TOKEN}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (!weightResponse.data.error) {
-  //       const message = weightResponse.data.message; // Ajusta según tu API
-  //       const weight = message.split(':')[1].trim();  // Obtener la parte después de ':'
-  //       console.log("Peso detectado:", message);
-  //       setWeight(weight);
-  //       onWeightChange(weight);
-  //       handleClick(3);
-  //       console.log("Peso detectado:", weight);
-  //       Swal.fire({
-  //         title: "Peso Detectado",
-  //         text: `El peso detectado es de ${weight} kg.`,
-  //         icon: "info",
-  //         confirmButtonText: "OK",
-  //       });
-  //     } else {
-  //       Swal.fire({
-  //         title: "Error",
-  //         text: `No se pudo obtener el peso.`,
-  //         icon: "error",
-  //         confirmButtonText: "OK",
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //     Swal.fire({
-  //       title: "Error",
-  //       text: `No se pudo obtener el peso.`,
-  //       icon: "error",
-  //       confirmButtonText: "OK",
-  //     });
-  //   }
-  // };
 
   // Determina si el botón "Continuar" debe ser visible
   return (
@@ -338,18 +284,13 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
         id="continueButton"
         className="px-8 py-2 bg-orange-500 text-white text-bold text-xl rounded-full"
         type="button"
-        onClick={handleOpenDoor}
+        onClick={handleContinue}
         style={{
           display: showContinueButton ? "block" : "none",
         }}
       >
-        Iniciar pesado
+        Iniciar pesado test
       </button>
-      {/* <button
-        onClick={handleOpenDoor}
-        className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-4">
-        PRUEBA DE BOTON CON MQTT
-      </button>  */}
     </div>
   );
 };

@@ -5,12 +5,14 @@ import EstafetaLogo from "../assets/images/logos/estafeta-logo-png-transparent.p
 import PaqueteExLogo from "../assets/images/logos/Paquetexpress Logo Vector.svg";
 
 export default function ShipmentInfo({ data, handleClick }) {
+  const paqute_tipo = localStorage.getItem("tipo_paquete");
   const logoMap = {
     Fedex: FedexLogo,
     "Paquete Express": PaqueteExLogo,
     DHL: DhlLogo,
     Estafeta: EstafetaLogo,
   };
+  console.log('paqute_tipo', paqute_tipo);
 
   const logo = logoMap[data.company.proveedor] || ""; // Si no hay logo, se deja vacío
 
@@ -44,6 +46,11 @@ export default function ShipmentInfo({ data, handleClick }) {
       <p className="text-lg  text-gray-600">
         <strong>Fecha de entrega:</strong> {data.company.tiempo_de_entrega}
       </p>
+      {paqute_tipo === "Paquete" && (
+        <p className="text-lg  text-gray-600">
+          <strong>Valor Declarado:</strong> {data.package.value} MXN
+        </p>
+      )}
     
      <button
         onClick={() => handleClick(4)}
@@ -96,6 +103,11 @@ export default function ShipmentInfo({ data, handleClick }) {
             <p className="text-sm text-gray-600">
               <strong>Seguro:</strong> {data.package.insurance ? "Sí" : "No"}
             </p>
+            {paqute_tipo === "Paquete" && (
+        <p className="text-lg  text-gray-600">
+          <strong>Valor Declarado:</strong> {data.package.value} MXN
+        </p>
+      )}
           </div>
 
           {/* Información del Origen */}

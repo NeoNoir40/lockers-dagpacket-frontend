@@ -159,7 +159,7 @@ export default function Step4({ handleClick, shippingData }) {
     utilice_lic:
       Number(shippingData.company.precio) -
       Number(shippingData.company.precio_regular) * 0.3, // Utilidad de licencias (30% de ganancia)
-    description: shippingData.package.descripcion, // Descripción del paquete
+    description: shippingData.package.description, // Descripción del paquete
     provider: shippingData.company.proveedor, // Proveedor, ejemplo: "FedEx"
     apiProvider: provider_shiping, // API del proveedor
     idService: shippingData.company.idServicio, // Servicio, ejemplo: "SAME_DAY_CITY"

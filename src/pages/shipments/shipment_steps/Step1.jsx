@@ -151,10 +151,20 @@ export default function Step1({
       onCPChange(inputValue); // Ensure the postal code is set
     }
 
+    const currentStoredType = localStorage.getItem("tipo_paquete");
+
+    const newPackageType = packageType === "Sobre" ? "Sobre" : "Paquete";
+
+ if (currentStoredType !== newPackageType) {
+    localStorage.setItem("tipo_paquete", newPackageType);
+    console.log(`Tipo de paquete actualizado a: ${newPackageType}`);
+  }
 
 
     // If the package type is 'Sobre', go to step 3, else go to step 2
     if (packageType === "Sobre") {
+   
+
       handleWeightChange(0.5);
       handlePackage(packageType);
       handleClick(3);

@@ -1,4 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import AudioDescription from "../../../assets/voice/description.mp3";
+import AudioConfirmationData from "../../../assets/voice/verify_data.mp3";
+import SelectQuoteAudio from "../../../assets/voice/select_quote.mp3";
 import { useNavigate } from "react-router-dom";
 import DhlLogo from "../../../assets/images/logos/dhl-logo.svg";
 import FedexLogo from "../../../assets/images/logos/fedex-logo.svg";
@@ -77,13 +80,16 @@ export default function Step3({
   handlePackageDataChange,
 }) {
   //Nuevos estados para el flujo de la cotización
-  const { getGabetas ,gavetaAvailable} = useAuth();
+  const { getGabetas, gavetaAvailable } = useAuth();
   const [step1, setStep1] = useState(true);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [step3, setStep3] = useState(false);
   const [step4, setStep4] = useState(false);
   const [step5, setStep5] = useState(false);
-
+  // Referencias para los audios
+  const audioDescription = useRef(null);
+  const verifyData = useRef(null);
+  const selectQuote = useRef(null);
   const cp = localStorage.getItem("zipCode");
   const [isConfirmedPackage, setIsConfirmedPackage] = useState(false);
   const [goToDetails, setGoToDetails] = useState(false);
@@ -116,48 +122,49 @@ export default function Step3({
       setStep3(true);
       fetchQuote(data);
       console.log("Datos enviados:", data);
-    }else{
+    } else {
       setUpdateOrder(false);
-
     }
   }, []);
 
-    const navigate = useNavigate(); // Inicializa useNavigate
-  
-    useEffect(() => {
-      if (gavetaAvailable === null || gavetaAvailable === false) {
-        const title = gavetaAvailable === null ? "Gaveta no asignada" : "Sin Gavetas Disponibles por el momento";
-        
-        let timerInterval;
+  const navigate = useNavigate(); // Inicializa useNavigate
 
-        Swal.fire({
-          icon: "error",
-          title: title,
-          html: "Se cerrara en <b></b>. milisegundos.",
-          timer: 3000,
-          timerProgressBar: true,
-          showConfirmButton: false,
+  useEffect(() => {
+    if (gavetaAvailable === null || gavetaAvailable === false) {
+      const title =
+        gavetaAvailable === null
+          ? "Gaveta no asignada"
+          : "Sin Gavetas Disponibles por el momento";
+
+      let timerInterval;
+
+      Swal.fire({
+        icon: "error",
+        title: title,
+        html: "Se cerrara en <b></b>. milisegundos.",
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
         allowOutsideClick: false, // Deshabilita el clic fuera del modal
         allowEscapeKey: false, // Deshabilita la tecla ESC
-          didOpen: () => {
-            Swal.showLoading();
-            const timer = Swal.getPopup().querySelector("b");
-            timerInterval = setInterval(() => {
-              timer.textContent = `${Swal.getTimerLeft()}`; // Actualiza el tiempo restante
-            }, 100);
-          },
-          willClose: () => {
-            clearInterval(timerInterval);
-          }
-        }).then((result) => {
-          if (result.dismiss === Swal.DismissReason.timer) {
-            console.log("I was closed by the timer");
-            navigate('/'); // Redirige a la ruta principal
-
-          }
-        });
-      }
-    }, []); 
+        didOpen: () => {
+          Swal.showLoading();
+          const timer = Swal.getPopup().querySelector("b");
+          timerInterval = setInterval(() => {
+            timer.textContent = `${Swal.getTimerLeft()}`; // Actualiza el tiempo restante
+          }, 100);
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        },
+      }).then((result) => {
+        if (result.dismiss === Swal.DismissReason.timer) {
+          console.log("I was closed by the timer");
+          navigate("/"); // Redirige a la ruta principal
+        }
+      });
+    }
+  }, []);
 
   const [quote, setQuote] = useState(null);
 
@@ -364,6 +371,22 @@ export default function Step3({
     setStep3(false);
   };
 
+  useEffect(() => {
+    if (step1) {
+      audioDescription.current.play();
+    } else if (!step1 && audioDescription.current) {
+      audioDescription.current.stop();
+    }
+
+    if (showConfirmation) {
+      verifyData.current.play();
+    } else if (!showConfirmation && verifyData.current) {
+      verifyData.current.stop();
+    }
+
+ 
+  }, []);
+
   return (
     <div className="p-6 ">
       {step5 && (
@@ -371,99 +394,99 @@ export default function Step3({
           <ShipmentInfo data={shippingData} handleClick={handleClick} />
         </>
       )}
-      
-      {shippingData.company != null && update_order !== false && (
-  <>
-    <UpdateShipmentInfo
-      handleClick={handleClick}
-      shipment_info={shippingData}
-      handleSenderDataChange={handleSenderDataChange}
-      handleRecipientDataChange={handleRecipientDataChange}
-    />
-  </>
-)}
-   
-{update_order ? (
-  <>
-  </>
 
-):(<>
-{step4 && (
-  <>
-    <div className="grid grid-cols-2 gap-10">
-      <SenderFormSection
-        title="Datos del Remitente"
-        inputFields={inputFieldsSender}
-        data={shippingData.sender}
-        onChange={handleSenderDataChange}
-        disabled={false} // Habilitar inputs
-        active={activeFormSender}
-        activeRecipient={activeFormRecipient}
-      />
-      <FormSection
-        title="Datos del Destinatario"
-        inputFields={inputFields}
-        data={shippingData.recipient}
-        onChange={handleRecipientDataChange}
-        disabled={false} // Habilitar inputs
-        activeRecipient={activeFormRecipient}
-      />
-      {/* <button
+      {shippingData.company != null && update_order !== false && (
+        <>
+          <UpdateShipmentInfo
+            handleClick={handleClick}
+            shipment_info={shippingData}
+            handleSenderDataChange={handleSenderDataChange}
+            handleRecipientDataChange={handleRecipientDataChange}
+          />
+        </>
+      )}
+
+      {update_order ? (
+        <></>
+      ) : (
+        <>
+          {step4 && (
+            <>
+              <div className="grid grid-cols-2 gap-10">
+                <SenderFormSection
+                  title="Datos del Remitente"
+                  inputFields={inputFieldsSender}
+                  data={shippingData.sender}
+                  onChange={handleSenderDataChange}
+                  disabled={false} // Habilitar inputs
+                  active={activeFormSender}
+                  activeRecipient={activeFormRecipient}
+                />
+                <FormSection
+                  title="Datos del Destinatario"
+                  inputFields={inputFields}
+                  data={shippingData.recipient}
+                  onChange={handleRecipientDataChange}
+                  disabled={false} // Habilitar inputs
+                  activeRecipient={activeFormRecipient}
+                />
+                {/* <button
         onClick={handleStep5}
         className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6">
         Continuar 4
       </button> */}
-      {activeFormSender ? (
-        <button
-          onClick={handleFormSender}
-          className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
-        >
-          Continuar
-        </button>
-      ) : (
-        <button
-          onClick={editFormSender}
-          className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
-        >
-          Editar
-        </button>
-      )}
-      {activeFormRecipient && (
-        <button
-          onClick={handleFormRecipient}
-          className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
-        >
-          Continuar
-        </button>
+                {activeFormSender ? (
+                  <button
+                    onClick={handleFormSender}
+                    className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
+                  >
+                    Continuar
+                  </button>
+                ) : (
+                  <button
+                    onClick={editFormSender}
+                    className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
+                  >
+                    Editar
+                  </button>
+                )}
+                {activeFormRecipient && (
+                  <button
+                    onClick={handleFormRecipient}
+                    className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
+                  >
+                    Continuar
+                  </button>
+                )}
+
+                {!activeFormRecipient && !activeFormSender && (
+                  <button
+                    onClick={handleEditFormRecipient}
+                    className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
+                  >
+                    Editar
+                  </button>
+                )}
+
+                {!activeFormRecipient && !activeFormSender ? (
+                  <div className=" absolute  left-[77%] text-center text-md bg-white p-5 shadow-md rounded-xl">
+                    <h2>Presione para continuar a la siguiente pantalla</h2>
+                    <button
+                      onClick={handleStep5}
+                      className="bg-orange-500  text-white text-xl font-semibold px-6 py-3 rounded-lg "
+                    >
+                      Continuar
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )}
+              </div>
+            </>
+          )}
+        </>
       )}
 
-      {!activeFormRecipient && !activeFormSender && (
-        <button
-          onClick={handleEditFormRecipient}
-          className="bg-gray-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
-        >
-          Editar
-        </button>
-      )}
-
-      {!activeFormRecipient && !activeFormSender ? (
-        <div className=" absolute  left-[77%] text-center text-md bg-white p-5 shadow-md rounded-xl">
-          <h2>Presione para continuar a la siguiente pantalla</h2>
-          <button
-            onClick={handleStep5}
-            className="bg-orange-500  text-white text-xl font-semibold px-6 py-3 rounded-lg "
-          >
-            Continuar
-          </button>
-        </div>
-      ) : (
-        <></>
-      )}
-    </div>
-  </>
-)}
-</>)}
-      
       {step3 && (
         <>
           <ShipmentServices
@@ -472,11 +495,17 @@ export default function Step3({
             handleStep4={handleStep4}
             logoMap={logoMap}
           />
+          <audio
+            ref={selectQuote}
+            src={SelectQuoteAudio}
+            type="audio/mp3"
+            autoPlay
+          />
         </>
       )}
 
       {showConfirmation && (
-        <div >
+        <div>
           <h1 className="text-3xl font-semibold mb-6">Confirmar Datos</h1>
           <div className="flex gap-8">
             <PackageFormSection
@@ -500,6 +529,12 @@ export default function Step3({
               Editar
             </button>
           </div>
+          <audio
+            ref={verifyData}
+            src={AudioConfirmationData}
+            type="audio/mp3"
+            autoPlay
+          />
         </div>
       )}
 
@@ -507,6 +542,7 @@ export default function Step3({
         <div className=" h-full w-full fixed flex flex-row gap-10 top-[180px]  left-[450px]  ">
           <div className=" ">
             <PackageFormSection
+              shipingData={shippingData}
               packageFields={packageFields}
               title="Datos del Paquete"
               data={shippingData.package}
@@ -515,14 +551,20 @@ export default function Step3({
             />
           </div>
 
-       <div>
-       <button
-            onClick={handleContinue}
-            className="bg-orange-500 text-white text-xl font-semibold px-6 py-3  mt-6 rounded-full"
-          >
-            Continuar
-          </button>
-       </div>
+          <div>
+            <button
+              onClick={handleContinue}
+              className="bg-orange-500 text-white text-xl font-semibold px-6 py-3  mt-6 rounded-full"
+            >
+              Continuar
+            </button>
+          </div>
+          <audio
+            ref={audioDescription}
+            src={AudioDescription}
+            type="audio/mp3"
+            autoPlay
+          />
         </div>
       )}
     </div>

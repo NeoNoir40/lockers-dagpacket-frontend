@@ -13,7 +13,6 @@ export const FormSection = ({
   const [activeInput, setActiveInput] = useState(null); // Estado del input activo
   const keyboardRef = useRef(null); // Referencia para el teclado virtual
 
-
   const handleKeyPress = (val) => {
     if (activeInput) {
       let currentValue = data[activeInput] || "";
@@ -26,7 +25,7 @@ export const FormSection = ({
           newValue = currentValue.slice(0, -1);
         } else {
           // Si es añadir, concatenamos y luego aplicamos las restricciones
-          newValue = (currentValue + val).replace(/\D/g, '').slice(0, 10);
+          newValue = (currentValue + val).replace(/\D/g, "").slice(0, 10);
         }
       } else {
         // Para otros campos, mantenemos la lógica original
@@ -39,7 +38,6 @@ export const FormSection = ({
       onChange({ ...data, [activeInput]: newValue });
     }
   };
-
 
   const handleClickOutside = (event) => {
     if (keyboardRef.current && !keyboardRef.current.contains(event.target)) {
@@ -55,17 +53,17 @@ export const FormSection = ({
   }, []);
 
   const handlePhoneChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+    const value = e.target.value.replace(/\D/g, "").slice(0, 10);
     onChange({ ...data, phone: value });
   };
-  
 
   return (
     <div className={` ${activeRecipient ? "" : "bg-gray-900 rounded-xl"}  `}>
       <div
         className={`bg-white  ${
           activeRecipient ? "" : "opacity-90"
-        }  p-6 rounded-lg shadow-md`}>
+        }  p-6 rounded-lg shadow-md`}
+      >
         <h3 className="text-2xl font-semibold mb-4">{title}</h3>
         <div className="grid grid-cols-1 gap-4">
           {/* Campo "Dirección" ocupa el ancho completo */}
@@ -99,19 +97,18 @@ export const FormSection = ({
           </div>
 
           {/* Campo "Teléfono" ocupa el ancho completo */}
-    <div className="w-full">
-    <InputField
-  label="Teléfono"
-  value={data.phone}
-  onChange={handlePhoneChange}
-  disabled={disabled}
-  onFocus={() => setActiveInput("phone")}
-  className="w-full"
-  maxLength={10}
-  type="tel"
-/>
-</div>
-
+          <div className="w-full">
+            <InputField
+              label="Teléfono"
+              value={data.phone}
+              onChange={handlePhoneChange}
+              disabled={disabled}
+              onFocus={() => setActiveInput("phone")}
+              className="w-full"
+              maxLength={10}
+              type="tel"
+            />
+          </div>
 
           {/* Campos "País" y "Código Postal" en una fila */}
           <div className="grid grid-cols-2 gap-4">
@@ -209,7 +206,8 @@ export const FormSection = ({
           className={`absolute top-[40%] right-[50%] ${
             activeRecipient ? "" : "hidden"
           }`}
-          ref={keyboardRef}>
+          ref={keyboardRef}
+        >
           <VirtualKeyboardFull
             className=""
             onKeyPress={handleKeyPress} // Cambiar valor del input
@@ -243,7 +241,7 @@ export const SenderFormSection = ({
           newValue = currentValue.slice(0, -1);
         } else {
           // Si es añadir, concatenamos y luego aplicamos las restricciones
-          newValue = (currentValue + val).replace(/\D/g, '').slice(0, 10);
+          newValue = (currentValue + val).replace(/\D/g, "").slice(0, 10);
         }
       } else {
         // Para otros campos, mantenemos la lógica original
@@ -256,7 +254,6 @@ export const SenderFormSection = ({
       onChange({ ...data, [activeInput]: newValue });
     }
   };
-
 
   const handleClickOutside = (event) => {
     if (keyboardRef.current && !keyboardRef.current.contains(event.target)) {
@@ -276,21 +273,26 @@ export const SenderFormSection = ({
       <div
         className={`bg-white  ${
           active ? "" : "opacity-90"
-        } p-6 rounded-lg shadow-md`}>
+        } p-6 rounded-lg shadow-md`}
+      >
         <h3 className="text-2xl font-semibold mb-4">{title}</h3>
         <div className="grid grid-cols-1 gap-4">
           <div className="grid grid-cols-2 gap-4">
             <InputField
               label={"Nombre completo"}
               value={data.nameSender}
-              onChange={(e) => onChange({ ...data, nameSender: e.target.value })} // Corregido para usar nameSender
+              onChange={(e) =>
+                onChange({ ...data, nameSender: e.target.value })
+              } // Corregido para usar nameSender
               disabled={disabled}
               onFocus={() => setActiveInput("nameSender")} // Asegúrate de que el nombre coincida
             />
             <InputField
               label={"Correo Electrónico"}
               value={data.emailSender}
-              onChange={(e) => onChange({ ...data, emailSender: e.target.value })} // Corregido para usar emailSender
+              onChange={(e) =>
+                onChange({ ...data, emailSender: e.target.value })
+              } // Corregido para usar emailSender
               disabled={disabled}
               onFocus={() => setActiveInput("emailSender")} // Asegúrate de que el nombre coincida
             />
@@ -309,7 +311,8 @@ export const SenderFormSection = ({
           className={`absolute ${
             active ? "" : "hidden"
           } top-[45%] right-[50%] `}
-          ref={keyboardRef}>
+          ref={keyboardRef}
+        >
           <VirtualKeyboardFull
             onKeyPress={handleKeyPress} // Cambiar valor del input
             activeInput={activeInput}
@@ -321,10 +324,15 @@ export const SenderFormSection = ({
   );
 };
 
-export const PackageFormSection = ({ title, data, onChange, disabled }) => {
+export const PackageFormSection = ({
+  title,
+  data,
+  onChange,
+  disabled,
+}) => {
   const [activeInput, setActiveInput] = useState(null); // Estado para el campo activo
   const keyboardRef = useRef(null); // Referencia para el teclado virtual
-
+  const paquete = localStorage.getItem("tipo_paquete");
   const handleKeyPress = (val) => {
     if (activeInput) {
       const currentValue = data[activeInput] || "";
@@ -350,8 +358,22 @@ export const PackageFormSection = ({ title, data, onChange, disabled }) => {
           className="w-full h-32 text-xl"
           type="textarea"
         />
+
+        {paquete === "Paquete" && (
+          <InputField
+            label="Valor Declarado"
+            value={data.value}
+            onChange={(e) => onChange({ ...data, value: e.target.value })}
+            disabled={disabled}
+            onFocus={() => setActiveInput("value")}
+            type="number"
+          />
+        )}
+
         <div className="gap-2 flex">
-          <label htmlFor="" className="text-xl">Desea asegurar su paquete?</label>
+          <label htmlFor="" className="text-xl">
+            Desea asegurar su paquete?
+          </label>
           <InputField
             label="Seguro"
             type="checkbox"
@@ -364,10 +386,9 @@ export const PackageFormSection = ({ title, data, onChange, disabled }) => {
 
       {/* Teclado virtual siempre visible */}
       <div
-        className={`absolute top-[30%]  ${
-          activeInput ? "" : "hidden"
-        }`}
-        ref={keyboardRef}>
+        className={`absolute top-[30%]  ${activeInput ? "" : "hidden"}`}
+        ref={keyboardRef}
+      >
         <VirtualKeyboardFull
           onKeyPress={handleKeyPress}
           activeInput={activeInput}
@@ -386,7 +407,7 @@ export const InputField = ({
   type,
   onFocus,
   className, // Agregar className para personalizar el ancho
-  maxLength
+  maxLength,
 }) => {
   // Verificamos si el tipo es "textarea" para decidir qué tipo de elemento renderizar
   const isTextArea = type === "textarea";
@@ -414,10 +435,8 @@ export const InputField = ({
       disabled={disabled || label === "Código Postal"} // Deshabilitar si es Código Postal
       className={`border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 ${className} ${
         disabled ? "bg-gray-200 cursor-not-allowed" : ""
-        
       }`}
       maxLength={maxLength} // Limita el número máximo de caracteres
-
     />
   );
 };
