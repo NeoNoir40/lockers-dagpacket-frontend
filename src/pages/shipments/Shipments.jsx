@@ -81,7 +81,7 @@ export default function Shipment() {
   };
 
     // Define handlePackage to accept height, width, length, weight, and value
-    const handlePackage = (type,height, width, length, weight, ) => {
+    const handlePackage = (type,height, width, length ) => {
       setShippingData((prev) => ({
         ...prev,
         package: {
@@ -90,7 +90,6 @@ export default function Shipment() {
           height,
           width,
           length,
-          weight
         },
       }));
     };

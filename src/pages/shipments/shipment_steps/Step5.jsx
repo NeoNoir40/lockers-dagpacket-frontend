@@ -7,6 +7,7 @@ import "../../../assets/css/shipment/shipment.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import {updateSaturation} from '../../../../context/auth'
+import { set } from "react-hook-form";
 
 const api = import.meta.env.VITE_REACT_API_URL;
 
@@ -23,6 +24,26 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   const pin_gabeta = localStorage.getItem("pin_gabeta");
   console.log("Locker ID:", locker_id);
   console.log("User ID:", _idgabeta);
+  const [idGabetaTest, setIdGabetaTest] = useState(1);
+  const [pinTest, setPinTest] = useState('');
+  const type_gabeta = localStorage.getItem("tipo_paquete");
+
+
+  useEffect(() => {
+    if(audioOpen.current){
+      audioOpen.current.play();
+    }
+
+    if(type_gabeta == 'Sobre'){
+      setIdGabetaTest(1);
+      setPinTest('2tb71kyR7Q');
+    }else{
+      setIdGabetaTest(2);
+      setPinTest('ccgxTyknsr');
+    }
+
+  }
+  ,[]);
   const audioOpen = useRef(null);
   const audioError = useRef(null);
   const navigate = useNavigate();
@@ -94,10 +115,10 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
       const response = await axios.patch(
         `${api}/gabeta/update-saturation`,
         {
-          _id: _idgabeta,
+          _id: idGabetaTest,
           package:shipment_id,
           saturation: true,
-          pin: pin_gabeta,
+          pin: pinTest,
           email: email,
           nombre: name
         },
@@ -174,7 +195,7 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
           {
             locker_id: locker_id,
             action: "sendLocker",
-            gabeta: gabeta_id,
+            gabeta: idGabetaTest,
           },
           {
             headers: {
@@ -322,14 +343,7 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   }, []);
 
 
-  useEffect(() => {
-    if(audioOpen.current){
-      audioOpen.current.play();
-    }
-
-
-  }
-  ,[]);
+ 
 
  
 
@@ -342,6 +356,11 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
         <span className="text-orange-500">introduce tu paquete</span>
       </h1>
       <div className="flex justify-center items-center h-[40vh] w-full max-w-5xl px-4">
+      <div className="lockers-container grid gap-1 h-full w-[250px] bg-gray-400 border-4 border-gray-400">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="bg-gray-200 p-3"></div>
+          ))}
+        </div>
         <div className="screen-container grid gap-1 h-full w-1/5 bg-gray-400 border-4 border-gray-400">
           <div className="locker17 bg-gray-200 px-3 py-2">
             <div className="bg-black w-full h-full"></div>
@@ -354,21 +373,14 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
           <div className="locker19 bg-gray-200 p-3"></div>
           <div className="locker20 bg-gray-200 p-3 open"></div>
         </div>
-        <div className="lockers-container grid gap-1 h-full w-2/5 bg-gray-400 border-4 border-gray-400">
-          {Array.from({ length: 16 }).map((_, i) => (
+        <div className="lockers-container grid gap-1 h-full w-[250px] bg-gray-400 border-4 border-gray-400">
+          {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="bg-gray-200 p-3"></div>
           ))}
         </div>
       </div>
 
-      {isPackageInserted && (
-        <div
-          className="bg-green-100 border-t-4 border-green-500 rounded-md text-green-700 px-4 py-3 shadow-md mt-6"
-          role="alert">
-          <p className="font-bold">¡Paquete ingresado correctamente!</p>
-          <p>Tu paquete ha sido insertado en la gabeta correctamente.</p>
-        </div>
-      )}
+    
     </div>
   );
 };

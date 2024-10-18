@@ -19,19 +19,19 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
     handleClick(3);
   };
 
-  useEffect(() => {
-    // Datos simulados
-    const packageType = "Paquete"; // Tipo de paquete
-    const simulatedHeight = 30.10; // Altura en cm
-    const simulatedWidth = 20.50; // Ancho en cm
-    const simulatedLength = 10.20; // Longitud en cm
-    const simulatedWeight = 5.30; // Peso en kg
+  // useEffect(() => {
+  //   // Datos simulados
+  //   const packageType = "Paquete"; // Tipo de paquete
+  //   const simulatedHeight = 30.10; // Altura en cm
+  //   const simulatedWidth = 20.50; // Ancho en cm
+  //   const simulatedLength = 10.20; // Longitud en cm
+  //   const simulatedWeight = 5.30; // Peso en kg
 
-    // Llama a handlePackage con datos simulados
-    handlePackage(packageType,simulatedHeight, simulatedWidth, simulatedLength, simulatedWeight);
-    setDetectedWeight(simulatedWeight); // Establecer el peso detectado para propósitos de prueba
-    setShowContinueButton(true); // Mostrar el botón continuar
-  }, []); // Ejecutar una vez al montar el componente
+  //   // Llama a handlePackage con datos simulados
+  //   handlePackage(packageType,simulatedHeight, simulatedWidth, simulatedLength, simulatedWeight);
+  //   setDetectedWeight(simulatedWeight); // Establecer el peso detectado para propósitos de prueba
+  //   setShowContinueButton(true); // Mostrar el botón continuar
+  // }, []); // Ejecutar una vez al montar el componente
 
   console.log("Locker ID:", id_locker);
   console.log("Pesa:", scale);
@@ -104,7 +104,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
   const value = 1000
   // Suponiendo que 'weight' está disponible en la respuesta o en alguna otra parte del código
   const weight = detectedWeight; // Peso detectado
-  
+  console.log("Peso detectado:", weight); // Ejemplo: 5.30
   const paqueteTipo = "Paquete"; // Tipo de paquete
 
   console.log("Ancho:", ancho); // Ejemplo: 22.59
@@ -113,7 +113,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
 
 
   // Llama a handlePackage con las medidas detectadas y el peso convertido
-  handlePackage(paqueteTipo,alto,ancho,largo, value);
+  handlePackage(paqueteTipo,alto,ancho,largo,weight );
   handleClick(3);
 }
     } catch (error) {
@@ -197,6 +197,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
               // Puerta cerrada: mostrar el peso y detener el polling
               setWeight(weight);
               onWeightChange(weight);
+              console.log("Peso detectado:", weight);
               getMesaure();
             } else {
               // Si la puerta está abierta, repetir la consulta
@@ -250,6 +251,11 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
         pesarlo
       </h1>
       <div className="flex justify-center items-center h-[40vh] w-full max-w-5xl px-4">
+      <div className="lockers-container grid gap-1 h-full w-[250px] bg-gray-400 border-4 border-gray-400">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="bg-gray-200 p-3"></div>
+          ))}
+        </div>
         {/* Contenedor de la pantalla */}
         <div className="screen-container grid gap-1 h-full w-1/5 bg-gray-400 border-4 border-gray-400">
           <div className="locker17 bg-gray-200 px-3 py-2">
@@ -263,8 +269,8 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
           <div className="locker19 bg-gray-200 p-3"></div>
           <div className="locker20 bg-gray-200 p-3 open"></div>
         </div>
-        <div className="lockers-container grid gap-1 h-full w-2/5 bg-gray-400 border-4 border-gray-400">
-          {Array.from({ length: 16 }).map((_, i) => (
+        <div className="lockers-container grid gap-1 h-full w-[250px] bg-gray-400 border-4 border-gray-400">
+          {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="bg-gray-200 p-3"></div>
           ))}
         </div>

@@ -400,6 +400,11 @@ useEffect(() => {
               <span className="text-orange-500">introduce tu paquete</span>
             </h1>
             <div className="flex justify-center items-center h-[40vh] w-full max-w-5xl px-4">
+            <div className="lockers-container grid gap-1 h-full w-[250px] bg-gray-400 border-4 border-gray-400">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="bg-gray-200 p-3"></div>
+          ))}
+        </div>
               <div className="screen-container grid gap-1 h-full w-1/5 bg-gray-400 border-4 border-gray-400">
                 <div className="locker17 bg-gray-200 px-3 py-2">
                   <div className="bg-black w-full h-full"></div>
@@ -412,11 +417,11 @@ useEffect(() => {
                 <div className="locker19 bg-gray-200 p-3"></div>
                 <div className="locker20 bg-gray-200 p-3 open"></div>
               </div>
-              <div className="lockers-container grid gap-1 h-full w-2/5 bg-gray-400 border-4 border-gray-400">
-                {Array.from({ length: 16 }).map((_, i) => (
-                  <div key={i} className="bg-gray-200 p-3"></div>
-                ))}
-              </div>
+              <div className="lockers-container grid gap-1 h-full w-[250px] bg-gray-400 border-4 border-gray-400">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="bg-gray-200 p-3"></div>
+          ))}
+        </div>
             </div>
             <audio ref={audioRef}>
               <source src={Audio} type="audio/mp3" />
