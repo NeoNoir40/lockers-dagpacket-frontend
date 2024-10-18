@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 import axios from "axios";
+import waitAudioGaveta from '../../../assets/voice/wait_for_open.mp3'
+import errroGaveta from '../../../assets/voice/error_open_gaveta.mp3'
 import "../../../assets/css/shipment/shipment.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
@@ -18,10 +20,18 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   console.log("Gabeta ID:", gabeta_id);
   const shipment_id = localStorage.getItem("shipment_id");
   const user_id = localStorage.getItem("user_id");
+  const pin_gabeta = localStorage.getItem("pin_gabeta");
   console.log("Locker ID:", locker_id);
   console.log("User ID:", _idgabeta);
-
+  const audioOpen = useRef(null);
+  const audioError = useRef(null);
   const navigate = useNavigate();
+
+  console.log("Shipment datos:", shippingData);
+
+    const email = shippingData.recipient.email;
+    const name = shippingData.recipient.name;
+
 
     // Define initial state for data
 
@@ -87,6 +97,9 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
           _id: _idgabeta,
           package:shipment_id,
           saturation: true,
+          pin: pin_gabeta,
+          email: email,
+          nombre: name
         },
         {
           headers: {
@@ -101,57 +114,118 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   }
 
 
+  // const handleOpenDoor = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const openDoorResponse = await axios.post(
+  //       `${api}/mqtt/`,
+  //       {
+  //         locker_id: locker_id,
+  //         action: "sendLocker",
+  //         gabeta: gabeta_id,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!openDoorResponse.data.error) {
+  //       setOpenDoor(true);
+
+  //       Swal.fire({
+  //         title: "Locker Abierto",
+  //         text: `El locker se ha abierto correctamente.`,
+  //         icon: "success",
+  //         confirmButtonText: "OK",
+  //       });
+
+  //       return true;
+  //     } else {
+  //       Swal.fire({
+  //         title: "Error",
+  //         text: `No se pudo abrir el locker.`,
+  //         icon: "error",
+  //         confirmButtonText: "OK",
+  //       });
+
+  //       return false;
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: `No se pudo abrir el locker.`,
+  //       icon: "error",
+  //       confirmButtonText: "OK",
+  //     });
+
+  //     return false;
+  //   }
+  // };
+
   const handleOpenDoor = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const openDoorResponse = await axios.post(
-        `${api}/mqtt/`,
-        {
-          locker_id: locker_id,
-          action: "sendLocker",
-          gabeta: gabeta_id,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+    const attemptOpenDoor = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const openDoorResponse = await axios.post(
+          `${api}/mqtt/`,
+          {
+            locker_id: locker_id,
+            action: "sendLocker",
+            gabeta: gabeta_id,
           },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+  
+        if (!openDoorResponse.data.error) {
+          setOpenDoor(true);
+  
+          await Swal.fire({
+            title: "Locker Abierto",
+            text: `El locker se ha abierto correctamente.`,
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+  
+          return true;
+        } else {
+          throw new Error("No se pudo abrir el locker.");
         }
-      );
+      } catch (error) {
+        console.error(error);
 
-      if (!openDoorResponse.data.error) {
-        setOpenDoor(true);
+        if (audioError.current) {
+          audioError.current.play();
+        }
 
-        Swal.fire({
-          title: "Locker Abierto",
-          text: `El locker se ha abierto correctamente.`,
-          icon: "success",
-          confirmButtonText: "OK",
-        });
 
-        return true;
-      } else {
-        Swal.fire({
+        const result = await Swal.fire({
           title: "Error",
-          text: `No se pudo abrir el locker.`,
+          text: `No se pudo abrir el locker. ¿Desea intentar nuevamente?`,
           icon: "error",
-          confirmButtonText: "OK",
+          showCancelButton: true,
+          confirmButtonText: "Reintentar",
+          cancelButtonText: "Cancelar",
         });
-
-        return false;
+  
+        if (result.isConfirmed) {
+          return attemptOpenDoor(); // Reintento recursivo
+        } else {
+          return false; // El usuario ha decidido cancelar
+        }
       }
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        title: "Error",
-        text: `No se pudo abrir el locker.`,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-
-      return false;
-    }
+    };
+  
+    return attemptOpenDoor();
   };
 
+  
   const checkStatusDoor = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -233,7 +307,9 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
         if (lockerOpened) {
           console.log("Locker abierto correctamente.");
           setIsPackageInserted(true);
+          await updateGabetaSaturation();
           await handleCloseDoor();
+          
         } else {
           console.log("Hubo un problema abriendo el locker.");
         }
@@ -245,12 +321,22 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
     return () => clearTimeout(timer);
   }, []);
 
+
   useEffect(() => {
-    updateGabetaSaturation();
-  }, []);
+    if(audioOpen.current){
+      audioOpen.current.play();
+    }
+
+
+  }
+  ,[]);
+
+ 
 
   return (
     <div className="step2 flex flex-col justify-center items-center gap-8 bg-white p-10 rounded-md shadow-md">
+      <audio ref={audioOpen} src={waitAudioGaveta} autoPlay />
+      <audio ref={audioError} src={errroGaveta}  />
       <h1 className="text-3xl font-semibold mx-8 text-center">
         Espera a que la gabeta indicada se abra e{" "}
         <span className="text-orange-500">introduce tu paquete</span>

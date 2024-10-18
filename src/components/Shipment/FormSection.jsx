@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import VirtualKeyboardFull from "./VirtualKeyboard.jsx"; // Asegúrate de importar correctamente
-
 export const FormSection = ({
   title,
   data,
@@ -12,7 +11,6 @@ export const FormSection = ({
 }) => {
   const [activeInput, setActiveInput] = useState(null); // Estado del input activo
   const keyboardRef = useRef(null); // Referencia para el teclado virtual
-
   const handleKeyPress = (val) => {
     if (activeInput) {
       let currentValue = data[activeInput] || "";
@@ -57,6 +55,7 @@ export const FormSection = ({
     onChange({ ...data, phone: value });
   };
 
+
   return (
     <div className={` ${activeRecipient ? "" : "bg-gray-900 rounded-xl"}  `}>
       <div
@@ -67,7 +66,7 @@ export const FormSection = ({
         <h3 className="text-2xl font-semibold mb-4">{title}</h3>
         <div className="grid grid-cols-1 gap-4">
           {/* Campo "Dirección" ocupa el ancho completo */}
-          <div className="w-full">
+          <div className="w-full p-1">
             <InputField
               label="Dirección"
               value={data.address}
@@ -79,7 +78,7 @@ export const FormSection = ({
           </div>
 
           {/* Campos "Nombre" y "Correo Electrónico" en una fila */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 p-1">
             <InputField
               label="Nombre"
               value={data.name}
@@ -87,31 +86,33 @@ export const FormSection = ({
               disabled={disabled}
               onFocus={() => setActiveInput("name")}
             />
-            <InputField
-              label="Correo Electrónico"
-              value={data.email}
-              onChange={(e) => onChange({ ...data, email: e.target.value })}
-              disabled={disabled}
-              onFocus={() => setActiveInput("email")}
-            />
-          </div>
-
-          {/* Campo "Teléfono" ocupa el ancho completo */}
-          <div className="w-full">
-            <InputField
+         <InputField
               label="Teléfono"
               value={data.phone}
               onChange={handlePhoneChange}
               disabled={disabled}
               onFocus={() => setActiveInput("phone")}
-              className="w-full"
               maxLength={10}
               type="tel"
             />
           </div>
 
+          {/* Campo "Teléfono" ocupa el ancho completo */}
+          <div className="w-full p-1">
+          <InputField
+              label="Correo Electrónico"
+              value={data.email}
+              onChange={(e) => onChange({ ...data, email: e.target.value })}
+              disabled={disabled}
+              onFocus={() => setActiveInput("email")}
+              className="w-full"
+
+            />
+            
+          </div>
+
           {/* Campos "País" y "Código Postal" en una fila */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 p-1">
             <InputField
               label="País"
               value={data.country}
@@ -129,7 +130,7 @@ export const FormSection = ({
           </div>
 
           {/* Campos "Estado" y "Ciudad" en una fila */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 p-1">
             <InputField
               label="Estado"
               value={data.state}
@@ -147,7 +148,7 @@ export const FormSection = ({
           </div>
 
           {/* Campos "Colonia" y "Calle" en una fila */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 p-1">
             <InputField
               label="Colonia"
               value={data.colony}
@@ -165,7 +166,7 @@ export const FormSection = ({
           </div>
 
           {/* Campos "Número Exterior" y "Número Interior" en una fila */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4 p-1">
             <InputField
               label="Número Exterior"
               value={data.externalNumber}
@@ -187,7 +188,7 @@ export const FormSection = ({
           </div>
 
           {/* Campo "Referencias" ocupa el ancho completo */}
-          <div className="w-full">
+          <div className="w-full p-1">
             <InputField
               label="Referencias"
               value={data.references}
@@ -228,7 +229,6 @@ export const SenderFormSection = ({
 }) => {
   const [activeInput, setActiveInput] = useState(null); // Estado del input activo
   const keyboardRef = useRef(null); // Referencia para el teclado virtual
-
   const handleKeyPress = (val) => {
     if (activeInput) {
       let currentValue = data[activeInput] || "";
@@ -255,6 +255,8 @@ export const SenderFormSection = ({
     }
   };
 
+
+
   const handleClickOutside = (event) => {
     if (keyboardRef.current && !keyboardRef.current.contains(event.target)) {
       // setActiveInput(null); // Si decides ocultarlo
@@ -270,6 +272,8 @@ export const SenderFormSection = ({
 
   return (
     <div className={` ${active ? "" : "bg-gray-900 h-[212px] rounded-xl"}  `}>
+   
+
       <div
         className={`bg-white  ${
           active ? "" : "opacity-90"
@@ -277,7 +281,7 @@ export const SenderFormSection = ({
       >
         <h3 className="text-2xl font-semibold mb-4">{title}</h3>
         <div className="grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5 p-2">
             <InputField
               label={"Nombre completo"}
               value={data.nameSender}
@@ -287,7 +291,18 @@ export const SenderFormSection = ({
               disabled={disabled}
               onFocus={() => setActiveInput("nameSender")} // Asegúrate de que el nombre coincida
             />
-            <InputField
+                <InputField
+            label={"Teléfono"}
+            value={data.phoneSender}
+            onChange={(e) => onChange({ ...data, phoneSender: e.target.value })} // Corregido para usar phoneSender
+            disabled={disabled}
+            onFocus={() => setActiveInput("phoneSender")} // Asegúrate de que el nombre coincida
+          />
+         
+          </div>
+          <div className="flex w-full p-2" >
+          <InputField
+              className={"w-full"}
               label={"Correo Electrónico"}
               value={data.emailSender}
               onChange={(e) =>
@@ -297,13 +312,7 @@ export const SenderFormSection = ({
               onFocus={() => setActiveInput("emailSender")} // Asegúrate de que el nombre coincida
             />
           </div>
-          <InputField
-            label={"Teléfono"}
-            value={data.phoneSender}
-            onChange={(e) => onChange({ ...data, phoneSender: e.target.value })} // Corregido para usar phoneSender
-            disabled={disabled}
-            onFocus={() => setActiveInput("phoneSender")} // Asegúrate de que el nombre coincida
-          />
+       
         </div>
 
         {/* Teclado virtual siempre visible */}
@@ -433,7 +442,7 @@ export const InputField = ({
       onChange={onChange}
       onFocus={onFocus} // Ejecuta onFocus para activar el teclado
       disabled={disabled || label === "Código Postal"} // Deshabilitar si es Código Postal
-      className={`border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 ${className} ${
+      className={`border border-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 ${className} ${
         disabled ? "bg-gray-200 cursor-not-allowed" : ""
       }`}
       maxLength={maxLength} // Limita el número máximo de caracteres

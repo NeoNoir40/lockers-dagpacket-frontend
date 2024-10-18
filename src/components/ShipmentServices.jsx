@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import animationLoading from "../assets/icons/loading.mp4";
+import loadingAudio from '../assets/voice/loading.mp3'
 import { useNavigate } from "react-router-dom";
+import AudioService from '../assets/voice/select_quote.mp3'
 import { useAuth } from "../../context/AuthContext";
 const NO_QUOTES_ERROR = "No se encontraron cotizaciones.";
 const LOADING_MESSAGE = "Cargando cotizaciones...";
@@ -53,6 +55,8 @@ export default function ShipmentServices({
 
 
   const videoRef = useRef(null);
+  const audioRef = useRef(null);
+  const audioLoading = useRef(null);
   const [selectedQuote, setSelectedQuote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,9 +76,22 @@ export default function ShipmentServices({
 
 
   useEffect(() => {
-    if (loading && videoRef.current) {
+    if (loading && videoRef.current && audioRef.current && audioLoading.current) {
+
       videoRef.current.play().catch((error) => {
         console.error("Error al reproducir video:", error);
+      });
+
+      audioLoading.current.play().catch((error) => {
+        console.error("Error al reproducir audio:", error);
+      });
+
+      audioRef.current.stop()
+
+  
+    }else if(!loading && audioRef.current){
+      audioRef.current.play().catch((error) => {
+        console.error("Error al reproducir audio:", error);
       });
     }
   }, [loading]);
@@ -165,6 +182,12 @@ export default function ShipmentServices({
             playsInline
             className="w-full h-full"
           />
+          <audio
+            ref={audioLoading}
+            src={loadingAudio}
+            type="audio/mp3"
+            autoPlay
+          />
       </div>
     );
   }
@@ -176,6 +199,12 @@ export default function ShipmentServices({
   return (
     <div className="p-4 bg-white rounded-md shadow-lg mt-10">
       <h1 className="text-xl font-bold mb-4">Información de cotización</h1>
+      <audio
+        ref={audioRef}
+        src={AudioService}
+        type="audio/mp3"
+        autoPlay
+      />
       <div className="flex flex-wrap gap-2  items-center justify-center">
         {renderServices()}
       </div>

@@ -120,9 +120,11 @@ export const AuthProvider = ({ children }) => {
           // Si hay al menos una gabeta válida (que no sea "Pesa" ni "Impresora")
           const idGabeta = response.message[0].id_gabeta;
           const _idgabeta = response.message[0]._id;
+          const pin_gabeta = response.message[0].client_pin;
           setGavetaAvailable(true);
           localStorage.setItem("_idgabeta", _idgabeta);
           localStorage.setItem("idGabeta", idGabeta);
+          localStorage.setItem("pin_gabeta", pin_gabeta);
         }
       } 
     } catch (e) {

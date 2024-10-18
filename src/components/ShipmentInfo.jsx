@@ -56,7 +56,7 @@ export default function ShipmentInfo({ data, handleClick }) {
         onClick={() => handleClick(4)}
         className="bg-orange-500 p-3 mt-2 text-white text-lg font-semibold rounded-lg"
       >
-        Confirmar envío
+        Generar envío
       </button>
      </div>
       <div>

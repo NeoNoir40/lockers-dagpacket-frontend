@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { getCode } from "country-list";
 import { useAuth } from "../../../../context/AuthContext";
+import shipmentSuccess from '../../../assets/voice/shipment_success.mp3'
 import axios from "axios";
 import Swal from "sweetalert2";
 import loading_animtation from "../../../assets/icons/loading.mp4";
@@ -13,7 +14,7 @@ export default function Step4({ handleClick, shippingData }) {
   const [isLoading, setIsLoading] = useState(false);
   const [folio, setFolio] = useState("");
   const videoRef = useRef(null);
-
+const succesAudio = useRef(null);
   const locker_info = user.locker_info;
   const estadosHizo = {
     aguascalientes: "AS",
@@ -250,18 +251,26 @@ export default function Step4({ handleClick, shippingData }) {
 
   useEffect(() => {
     const order = localStorage.getItem("update_order");
-
-    if (order === "true") {
-      updateShipment();
-    } else {
-      generateShipment();
-    }
+  
+    const handleShipment = async () => {
+      if (order === "true") {
+        await updateShipment(); // Await for the asynchronous function
+      } else {
+        await generateShipment(); // Await for the asynchronous function
+      }
+    };
+  
+    handleShipment(); // Call the asynchronous function
   }, []);
 
   useEffect(() => {
     if (isLoading && videoRef.current) {
       videoRef.current.play().catch((error) => {
         console.error("Error al reproducir video:", error);
+      });
+    }else if(!isLoading && succesAudio.current){
+      succesAudio.current.play().catch((error) => {
+        console.error("Error al reproducir audio:", error);
       });
     }
   }, [isLoading]);
@@ -323,6 +332,12 @@ export default function Step4({ handleClick, shippingData }) {
         </>
       ) : (
         <div className="flex flex-col items-center justify-center h-full w-full p-6 bg-gray-100 rounded-lg shadow-lg">
+          <audio
+            ref={succesAudio}
+            src={shipmentSuccess}
+            type="audio/mp3"
+            autoPlay
+          />
           <p className="text-lg font-semibold text-orange-600 mb-4">
             El folio de tu envío es: {folio}
             <strong

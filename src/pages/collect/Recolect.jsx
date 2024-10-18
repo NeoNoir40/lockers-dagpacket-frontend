@@ -94,60 +94,124 @@ export default function Recolect(xf) {
     }
   };
 
+  // const handleOpenDoor = async () => {
+  //   console.log("Locker ID:", locker_id);
+  //   console.log("Gaveta ID:", gaveta.id_gabeta);
+  //   try {
+  //     const openDoorResponse = await axios.post(
+  //       `${api}/mqtt/`,
+  //       {
+  //         locker_id: locker_id,
+  //         action: "receiveLocker",
+  //         gabeta: gaveta.id_gabeta,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${TOKEN}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!openDoorResponse.data.error) {
+  //       Swal.fire({
+  //         title: "Locker Abierto",
+  //         text: `El locker se ha abierto correctamente.`,
+  //         icon: "success",
+  //         confirmButtonText: "OK",
+  //       });
+  //       // Llama a la función de log al abrir la gaveta
+  //       await updateGabetaSaturation();
+  //       await handleLogGaveta("Recibir paquete");
+  //       await handleCheckStatusDoor();
+
+  //     } else {
+  //       Swal.fire({
+  //         title: "Error",
+  //         text: `No se pudo abrir el Locker.`,
+  //         icon: "error",
+  //         confirmButtonText: "OK",
+  //       });
+  //       if (audioErrorRef.current) {
+  //         audioErrorRef.current.play();
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     Swal.fire({
+  //       title: "Error",
+  //       text: `No se pudo abrir el Locker.`,
+  //       icon: "error",
+  //       confirmButtonText: "OK",
+  //     });
+  //     if (audioErrorRef.current) {
+  //       audioErrorRef.current.play();
+  //     }
+  //   }
+  // };
+
+
   const handleOpenDoor = async () => {
-    console.log("Locker ID:", locker_id);
-    console.log("Gaveta ID:", gaveta.id_gabeta);
-    try {
-      const openDoorResponse = await axios.post(
-        `${api}/mqtt/`,
-        {
-          locker_id: locker_id,
-          action: "receiveLocker",
-          gabeta: gaveta.id_gabeta,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${TOKEN}`,
+    const attemptOpenDoor = async () => {
+      console.log("Locker ID:", locker_id);
+      console.log("Gaveta ID:", gaveta.id_gabeta);
+      try {
+        const openDoorResponse = await axios.post(
+          `${api}/mqtt/`,
+          {
+            locker_id: locker_id,
+            action: "receiveLocker",
+            gabeta: gaveta.id_gabeta,
           },
+          {
+            headers: {
+              Authorization: `Bearer ${TOKEN}`,
+            },
+          }
+        );
+  
+        if (!openDoorResponse.data.error) {
+          await Swal.fire({
+            title: "Locker Abierto",
+            text: `El locker se ha abierto correctamente.`,
+            icon: "success",
+            confirmButtonText: "OK",
+          });
+          // Llama a las funciones de log y actualización
+          await updateGabetaSaturation();
+          await handleLogGaveta("Recibir paquete");
+          await handleCheckStatusDoor();
+          return true;
+        } else {
+          throw new Error("No se pudo abrir el Locker.");
         }
-      );
-
-      if (!openDoorResponse.data.error) {
-        Swal.fire({
-          title: "Locker Abierto",
-          text: `El locker se ha abierto correctamente.`,
-          icon: "success",
-          confirmButtonText: "OK",
-        });
-        // Llama a la función de log al abrir la gaveta
-        await updateGabetaSaturation();
-        await handleLogGaveta("Recibir paquete");
-        await handleCheckStatusDoor();
-
-      } else {
-        Swal.fire({
-          title: "Error",
-          text: `No se pudo abrir el Locker.`,
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+      } catch (error) {
+        console.error(error);
+        
+        // Reproducir el audio de error
         if (audioErrorRef.current) {
           audioErrorRef.current.play();
         }
+  
+        const result = await Swal.fire({
+          title: "Error",
+          text: `No se pudo abrir el Locker. ¿Desea intentar nuevamente?`,
+          icon: "error",
+          showCancelButton: true,
+          confirmButtonText: "Reintentar",
+          cancelButtonText: "Cancelar",
+        });
+  
+        if (result.isConfirmed) {
+          return attemptOpenDoor(); // Reintento recursivo
+        } else {
+          return false; // El usuario ha decidido cancelar
+        }
       }
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        title: "Error",
-        text: `No se pudo abrir el Locker.`,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      if (audioErrorRef.current) {
-        audioErrorRef.current.play();
-      }
-    }
+    };
+  
+    return attemptOpenDoor();
   };
+
 
   const handleCheckStatusDoor = async () => {
     try {

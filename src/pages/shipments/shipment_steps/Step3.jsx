@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import AudioDescription from "../../../assets/voice/description.mp3";
 import AudioConfirmationData from "../../../assets/voice/verify_data.mp3";
-import SelectQuoteAudio from "../../../assets/voice/select_quote.mp3";
+import AudioFormSender from '../../../assets/voice/sender_form.mp3'
+import AudioFormRecpient from '../../../assets/voice/recipient_form.mp3'
 import { useNavigate } from "react-router-dom";
 import DhlLogo from "../../../assets/images/logos/dhl-logo.svg";
 import FedexLogo from "../../../assets/images/logos/fedex-logo.svg";
@@ -89,7 +90,7 @@ export default function Step3({
   // Referencias para los audios
   const audioDescription = useRef(null);
   const verifyData = useRef(null);
-  const selectQuote = useRef(null);
+  // const selectQuote = useRef(null);
   const cp = localStorage.getItem("zipCode");
   const [isConfirmedPackage, setIsConfirmedPackage] = useState(false);
   const [goToDetails, setGoToDetails] = useState(false);
@@ -99,6 +100,9 @@ export default function Step3({
   const [activeFormSender, setActiveFormSender] = useState(true);
   const [activeFormRecipient, setActiveFormRecipient] = useState(false);
   const order = localStorage.getItem("update_order");
+
+  const audioFormSender = useRef(null);
+  const audioFormRecipient = useRef(null);
 
   const [update_order, setUpdateOrder] = useState(false);
   const [data, setData] = useState({
@@ -285,7 +289,11 @@ export default function Step3({
       return;
     }
 
+    
+
     setActiveFormSender(false);
+
+
     setActiveFormRecipient(true);
   };
 
@@ -371,6 +379,7 @@ export default function Step3({
     setStep3(false);
   };
 
+
   useEffect(() => {
     if (step1) {
       audioDescription.current.play();
@@ -382,6 +391,20 @@ export default function Step3({
       verifyData.current.play();
     } else if (!showConfirmation && verifyData.current) {
       verifyData.current.stop();
+    }
+
+
+
+    if(activeFormSender && audioFormSender.current){
+      audioFormSender.current.play();
+    }else if(!activeFormSender && audioFormSender.current){
+      audioFormSender.current.stop();
+    }
+
+    if(activeFormRecipient && audioFormRecipient.current){
+      audioFormRecipient.current.play();
+    }else if(!activeFormRecipient && audioFormRecipient.current){
+      audioFormRecipient.current.stop();
     }
 
  
@@ -413,6 +436,8 @@ export default function Step3({
           {step4 && (
             <>
               <div className="grid grid-cols-2 gap-10">
+             
+                
                 <SenderFormSection
                   title="Datos del Remitente"
                   inputFields={inputFieldsSender}
@@ -436,12 +461,20 @@ export default function Step3({
         Continuar 4
       </button> */}
                 {activeFormSender ? (
+                  
                   <button
                     onClick={handleFormSender}
                     className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
                   >
                     Continuar
+                    <audio
+                  ref={audioFormSender}
+                  src={AudioFormSender}
+                  type="audio/mp3"
+                
+                />
                   </button>
+
                 ) : (
                   <button
                     onClick={editFormSender}
@@ -456,6 +489,12 @@ export default function Step3({
                     className="bg-orange-500 text-white text-xl font-semibold px-6 py-3 rounded-lg mt-6"
                   >
                     Continuar
+                    <audio
+                  ref={audioFormRecipient}
+                  src={AudioFormRecpient}
+                  type="audio/mp3"
+                  autoPlay
+                  ></audio>
                   </button>
                 )}
 
@@ -495,12 +534,7 @@ export default function Step3({
             handleStep4={handleStep4}
             logoMap={logoMap}
           />
-          <audio
-            ref={selectQuote}
-            src={SelectQuoteAudio}
-            type="audio/mp3"
-            autoPlay
-          />
+          
         </>
       )}
 
