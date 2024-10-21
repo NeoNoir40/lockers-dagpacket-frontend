@@ -148,72 +148,85 @@ export default function Recolect(xf) {
   //     }
   //   }
   // };
-
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleOpenDoor = async () => {
-    const attemptOpenDoor = async () => {
-      console.log("Locker ID:", locker_id);
-      console.log("Gaveta ID:", gaveta.id_gabeta);
-      try {
-        const openDoorResponse = await axios.post(
-          `${api}/mqtt/`,
-          {
-            locker_id: locker_id,
-            action: "receiveLocker",
-            gabeta: gaveta.id_gabeta,
+    console.log("Locker ID:", locker_id);
+    console.log("Gaveta ID:", gaveta.id_gabeta);
+  
+    try {
+      const openDoorResponse = await axios.post(
+        `${api}/mqtt/`,
+        {
+          locker_id: locker_id,
+          action: "receiveLocker",
+          gabeta: gaveta.id_gabeta,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
           },
-          {
-            headers: {
-              Authorization: `Bearer ${TOKEN}`,
-            },
-          }
-        );
-  
-        if (!openDoorResponse.data.error) {
-          await Swal.fire({
-            title: "Locker Abierto",
-            text: `El locker se ha abierto correctamente.`,
-            icon: "success",
-            confirmButtonText: "OK",
-          });
-          // Llama a las funciones de log y actualización
-          await updateGabetaSaturation();
-          await handleLogGaveta("Recibir paquete");
-          await handleCheckStatusDoor();
-          return true;
-        } else {
-          throw new Error("No se pudo abrir el Locker.");
         }
-      } catch (error) {
-        console.error(error);
-        
-        // Reproducir el audio de error
-        if (audioErrorRef.current) {
-          audioErrorRef.current.play();
-        }
+      );
   
-        const result = await Swal.fire({
-          title: "Error",
-          text: `No se pudo abrir el Locker. ¿Desea intentar nuevamente?`,
-          icon: "error",
-          showCancelButton: true,
-          confirmButtonText: "Reintentar",
-          cancelButtonText: "Cancelar",
-        });
-  
-        if (result.isConfirmed) {
-          return attemptOpenDoor(); // Reintento recursivo
-        } else {
-          return false; // El usuario ha decidido cancelar
-        }
+      // Verifica si no hay errores al abrir el locker
+      if (openDoorResponse.data.error) {
+        throw new Error("No se pudo abrir el Locker.");
       }
-    };
   
-    return attemptOpenDoor();
+      // Muestra el mensaje de éxito
+      Swal.fire({
+        title: "Locker Abierto",
+        text: "El locker se ha abierto correctamente.",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+  
+      // Actualiza la saturación de la gaveta
+      console.log("Actualizando saturación de la gaveta...");
+      await updateGabetaSaturation();
+  
+      // Registra la acción de la gaveta
+      console.log("Registrando acción de la gaveta...");
+      await handleLogGaveta("Recibir paquete");
+  
+      // Verifica el estado de la puerta
+      console.log("Verificando estado de la puerta...");
+      await handleCheckStatusDoor();
+  
+      return true; // Operación exitosa
+  
+    } catch (error) {
+      console.error(error);
+  
+      // Reproducir el audio de error
+      if (audioErrorRef.current) {
+        audioErrorRef.current.play();
+      }
+  
+      // Solicitar reintento al usuario
+      const result = await Swal.fire({
+        title: "Error",
+        text: "No se pudo abrir el Locker. ¿Desea intentar nuevamente?",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonText: "Reintentar",
+        cancelButtonText: "Cancelar",
+      });
+  
+      if (result.isConfirmed) {
+        return handleOpenDoor(); // Reintento
+      } else {
+        return false; // El usuario ha decidido cancelar
+      }
+    }
   };
+  
+  
 
 
   const handleCheckStatusDoor = async () => {
+    console.log("Verificando estado de la puerta...");
     try {
       const checkDoorResponse = await axios.post(
         `${api}/mqtt/`,

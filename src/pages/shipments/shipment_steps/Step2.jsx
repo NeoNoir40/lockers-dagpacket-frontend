@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import audioPesa from '../../../assets/voice/get_peso.mp3'
 import axios from "axios";
 const api = import.meta.env.VITE_REACT_API_URL; // Obtener la URL desde el .env
 import { useAuth } from "../../../../context/AuthContext";
@@ -14,7 +15,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
   const [loading, setLoading] = useState(false);
   const id_locker = localStorage.getItem("locker_id");
   const scale = localStorage.getItem("Pesa");
-
+const audioPesaRef = useRef(null);
   const handleContinue = () => {
     handleClick(3);
   };
@@ -250,6 +251,7 @@ const Step2 = ({ handleClick, onWeightChange, handlePackage }) => {
         <span className="text-orange-500"> introduce tu paquete</span> para
         pesarlo
       </h1>
+      <audio ref={audioPesaRef} src={audioPesa} autoPlay />
       <div className="flex justify-center items-center h-[40vh] w-full max-w-5xl px-4">
       <div className="lockers-container grid gap-1 h-full w-[250px] bg-gray-400 border-4 border-gray-400">
           {Array.from({ length: 8 }).map((_, i) => (

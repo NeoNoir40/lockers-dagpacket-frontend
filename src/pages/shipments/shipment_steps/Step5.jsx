@@ -6,6 +6,7 @@ import errroGaveta from '../../../assets/voice/error_open_gaveta.mp3'
 import "../../../assets/css/shipment/shipment.css";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
+import audioFinishProccess from '../../../assets/voice/process_finish.mp3'
 import {updateSaturation} from '../../../../context/auth'
 import { set } from "react-hook-form";
 
@@ -14,6 +15,7 @@ const api = import.meta.env.VITE_REACT_API_URL;
 const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   const [isPackageInserted, setIsPackageInserted] = useState(false);
   const [openDoor, setOpenDoor] = useState(false);
+  const audioFinish = useRef(null);
   const { user } = useAuth();
   const locker_id = localStorage.getItem("locker_id");
   const gabeta_id = localStorage.getItem("idGabeta");
@@ -24,7 +26,7 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   const pin_gabeta = localStorage.getItem("pin_gabeta");
   console.log("Locker ID:", locker_id);
   console.log("User ID:", _idgabeta);
-  const [idGabetaTest, setIdGabetaTest] = useState(1);
+  const [idGabetaTest, setIdGabetaTest] = useState(null);
   const [pinTest, setPinTest] = useState('');
   const type_gabeta = localStorage.getItem("tipo_paquete");
 
@@ -33,17 +35,18 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
     if(audioOpen.current){
       audioOpen.current.play();
     }
-
-    if(type_gabeta == 'Sobre'){
-      setIdGabetaTest(1);
-      setPinTest('2tb71kyR7Q');
-    }else{
-      setIdGabetaTest(2);
-      setPinTest('ccgxTyknsr');
-    }
+    setIdGabetaTest(type_gabeta === 'Sobre' ? '1' : '2');
+    setPinTest(type_gabeta === 'Sobre' ? '2tb71kyR7Q' : 'ccgxTyknsr');
+  
 
   }
   ,[]);
+
+ 
+  console.log('type_Gaveta :',  type_gabeta);
+  console.log('abriendo gabeta:',idGabetaTest);
+  console.log('pin:',pinTest);
+
   const audioOpen = useRef(null);
   const audioError = useRef(null);
   const navigate = useNavigate();
@@ -111,14 +114,18 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
 
   const updateGabetaSaturation = async () => {
     try {
+      const idgabetatest = type_gabeta === 'Sobre' ? '1' : '2';
+      const pintest = type_gabeta === 'Sobre' ? '2tb71kyR7Q' : 'ccgxTyknsr';
       const token = localStorage.getItem("token");
+      const shipment_idTest = localStorage.getItem("shipment_id");
+
       const response = await axios.patch(
         `${api}/gabeta/update-saturation`,
         {
-          _id: idGabetaTest,
-          package:shipment_id,
-          saturation: true,
-          pin: pinTest,
+          _id: _idgabeta,
+          package:shipment_idTest,
+          saturation: false,
+          pin: pintest,
           email: email,
           nombre: name
         },
@@ -128,6 +135,7 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
           },
         }
       );
+      console.log("Response:", response);
       console.log(response);
     } catch (e) {
       console.log(e);
@@ -189,13 +197,17 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   const handleOpenDoor = async () => {
     const attemptOpenDoor = async () => {
       try {
+
+        const idgabetatest = type_gabeta === 'Sobre' ? '1' : '2';
+        const actionType = type_gabeta === 'Sobre' ? 'receiveLocker' : 'sendLocker'; // Define la acción basada en type_gabeta
+
         const token = localStorage.getItem("token");
         const openDoorResponse = await axios.post(
           `${api}/mqtt/`,
           {
             locker_id: locker_id,
-            action: "sendLocker",
-            gabeta: idGabetaTest,
+            action: actionType,
+            gabeta: idgabetatest,
           },
           {
             headers: {
@@ -203,9 +215,10 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
             },
           }
         );
-  
+        console.log("Locker ID:", openDoorResponse);
         if (!openDoorResponse.data.error) {
           setOpenDoor(true);
+
   
           await Swal.fire({
             title: "Locker Abierto",
@@ -213,6 +226,10 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
             icon: "success",
             confirmButtonText: "OK",
           });
+
+          if (audioFinish.current) {
+            audioFinish.current.play();
+          }
   
           return true;
         } else {
@@ -220,7 +237,6 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
         }
       } catch (error) {
         console.error(error);
-
         if (audioError.current) {
           audioError.current.play();
         }
@@ -249,13 +265,15 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
   
   const checkStatusDoor = async () => {
     try {
+      const idgabetatest = type_gabeta === 'Sobre' ? '1' : '2';
+      
       const token = localStorage.getItem("token");
       const checkDoorResponse = await axios.post(
         `${api}/mqtt/`,
         {
           locker_id: locker_id,
           action: "checkDoor",
-          gabeta: gabeta_id,
+          gabeta: idgabetatest,
         },
         {
           headers: {
@@ -328,7 +346,7 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
         if (lockerOpened) {
           console.log("Locker abierto correctamente.");
           setIsPackageInserted(true);
-          await updateGabetaSaturation();
+           updateGabetaSaturation();
           await handleCloseDoor();
           
         } else {
@@ -349,6 +367,7 @@ const Step5 = ({ handleClick, onWeightChange, shippingData }) => {
 
   return (
     <div className="step2 flex flex-col justify-center items-center gap-8 bg-white p-10 rounded-md shadow-md">
+      <audio ref={audioFinish} src={audioFinishProccess} />
       <audio ref={audioOpen} src={waitAudioGaveta} autoPlay />
       <audio ref={audioError} src={errroGaveta}  />
       <h1 className="text-3xl font-semibold mx-8 text-center">
